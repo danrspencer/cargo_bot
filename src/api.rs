@@ -17,8 +17,5 @@ pub async fn send_request<T: Serialize>(body: &T) -> Response {
 
     let result = res.text().await.unwrap();
 
-    println!("🤖 response: ");
-    println!("{}", result);
-
     serde_json::from_str(&result).unwrap()
 }
