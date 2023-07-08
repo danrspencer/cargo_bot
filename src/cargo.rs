@@ -3,7 +3,20 @@ use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 use std::thread;
 
+pub fn build() -> String {
+    println!("🤖 cargo build");
+    let args = ["build", "--color=always"];
+    command(&args)
+}
+
+pub fn check() -> String {
+    println!("🤖 cargo check");
+    let args = ["check", "--color=always"];
+    command(&args)
+}
+
 pub fn clippy() -> String {
+    println!("🤖 cargo clippy -- -D warnings");
     let args = ["clippy", "--color=always", "--", "-D", "warnings"];
     command(&args)
 }

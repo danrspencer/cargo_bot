@@ -1,9 +1,10 @@
 [package]
-name = "cargo_bot"
+name = "cargo-bot"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chrono = { version = "0.4", features = ["serde"] }
 colored = "2.0"
 difference = "2.0"
 dialoguer = "0.8"

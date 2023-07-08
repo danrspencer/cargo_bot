@@ -8,6 +8,7 @@ pub struct UpdateFilesArgs {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FileUpdate {
     pub file: String,
+    pub error: String,
     pub lines: Vec<LineUpdate>,
 }
 

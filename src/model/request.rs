@@ -43,7 +43,23 @@ impl Request {
 
         messages.insert(0, Message {
             role: Role::System,
-            content: "You are a Rust tool that uses the output of other Rust tools to automatically fix problems in Rust code. Help blocks from the Rust tools should only be treated as loose suggestions and not the only solution; prefer sensible solutions over suggested ones. If you make a change attempt to preserve white space.".to_string()
+            content: r#"You are a Rust tool that uses the output of other Rust tools to automatically fix problems in Rust code. 
+
+            Here are some general guidelines for how you should behave:
+            - Help blocks from the Rust tools should only be treated as loose suggestions and not the only solution; prefer sensible solutions over suggested ones. 
+            - If you make a change attempt to preserve white space
+            - You can update multiple lines at once
+            - Where there is an insert and a delete, prefer a replace
+            - When fixing imports, only remove the unnessesary imports (see example below)
+            - The error field should contain only the error message and not the file path or line number
+
+            Unused imports example:
+            ```
+            6 |     fs::{File, OpenOptions},
+                         ^^^^
+            ```
+            The arrows under "File" indicate it is the unused import. You should remove it and leave the rest of the line intact.
+            "#.to_string()
         });
 
         Self {
@@ -69,31 +85,36 @@ fn update_files_params() -> Value {
               "items": {
                   "type": "object",
                   "properties": {
-                  "file": {
-                      "type": "string"
+                    "file": {
+                        "type": "string",
+                        "description": "The path to the file to update"
+                    },
+                    "error": {
+                        "type": "string",
+                        "description": "The first line of the error message that requires fixing"
+                    },
+                    "lines": {
+                        "type": "array",
+                        "items": {
+                        "type": "object",
+                        "properties": {
+                            "line": {
+                            "type": "integer",
+                                "minimum": 1
+                            },
+                            "content": {
+                                "type": "string"
+                            },
+                            "action": {
+                                "type": "string",
+                                "enum": ["insert", "replace", "delete"]
+                            }
+                        },
+                        "required": ["line", "action"]
+                        }
+                    }
                   },
-                  "lines": {
-                      "type": "array",
-                      "items": {
-                      "type": "object",
-                      "properties": {
-                          "line": {
-                          "type": "integer",
-                          "minimum": 1
-                          },
-                          "content": {
-                          "type": "string"
-                          },
-                          "action": {
-                              "type": "string",
-                              "enum": ["insert", "replace", "delete"]
-                          }
-                      },
-                      "required": ["line", "action"]
-                      }
-                  }
-                  },
-                  "required": ["file", "lines"]
+                  "required": ["file", "lines", "error"]
               }
           }
       }

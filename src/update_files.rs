@@ -3,47 +3,69 @@ use colored::*;
 use dialoguer::{theme::ColorfulTheme, Confirm};
 use difference::{Changeset, Difference};
 use std::{
-    fs::{self, File, OpenOptions},
-    io::{self, BufRead, BufReader, Write},
+    fs::OpenOptions,
+    io::{BufRead, BufReader, Write},
     path::Path,
 };
 
 pub fn update_files(args: &UpdateFilesArgs) {
     for file_update in &args.files {
-        let lines = update_file(file_update);
-
-        // Write the file
-        let mut file = OpenOptions::new()
-            .write(true)
-            .truncate(true)
-            .open(&file_update.file)
-            .unwrap();
-
-        for line in lines {
-            writeln!(file, "{}", line).unwrap();
-        }
+        update_file(file_update);
     }
-    println!()
 }
 
 fn update_file(file_update: &FileUpdate) -> Vec<String> {
-    let path = &file_update.file;
+    let path = Path::new(&file_update.file);
+    let mut lines: Vec<String> = {
+        let file = OpenOptions::new().read(true).open(path).unwrap();
+        let reader = BufReader::new(file);
+        reader.lines().collect::<Result<_, _>>().unwrap()
+    };
 
-    let path = Path::new(path);
-    let file = File::open(&path).unwrap();
-    let reader = io::BufReader::new(file);
+    println!();
 
-    let mut lines = reader.lines().collect::<Result<Vec<_>, _>>().unwrap();
+    let (mut error, message) = file_update
+        .error
+        .split_at(file_update.error.find(':').unwrap_or(0));
+    if error.is_empty() {
+        error = "error";
+    }
+    println!(
+        "{}{} {}",
+        error.bright_red().bold(),
+        ":".bold(),
+        message.bold()
+    );
 
     for line_update in &file_update.lines {
-        lines = apply_patch(&file_update.file, line_update.clone(), lines);
+        let updated_lines = apply_patch(&file_update.file, line_update, &lines);
+
+        if Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt("Do you want to apply these changes?")
+            .default(true)
+            .interact()
+            .unwrap()
+        {
+            let mut file = OpenOptions::new()
+                .write(true)
+                .truncate(true)
+                .open(path)
+                .unwrap();
+
+            for line in &updated_lines {
+                writeln!(file, "{}", line).unwrap();
+            }
+
+            lines = updated_lines;
+        }
     }
 
     lines
 }
 
-fn apply_patch(file: &str, line_update: &LineUpdate, lines: Vec<String>) -> Vec<String> {
-    let mut updated_lines = lines.clone();
+// TODO - We need to keep track of any lines added / removed so we're updating the correct line numbers on subsequent patches
+fn apply_patch(file: &str, line_update: &LineUpdate, lines: &[String]) -> Vec<String> {
+    let mut updated_lines = (*lines).to_vec();
 
     match line_update.action {
         LineAction::Insert => {
@@ -107,7 +129,6 @@ fn apply_patch(file: &str, line_update: &LineUpdate, lines: Vec<String>) -> Vec<
             let indent = " ".repeat(indent_size);
 
             if original_line_no - last_change_line_no > 1 {
-                println!();
                 println!(
                     "{}{} {}:{}",
                     indent,
@@ -121,14 +142,5 @@ fn apply_patch(file: &str, line_update: &LineUpdate, lines: Vec<String>) -> Vec<
         }
     }
 
-    if Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt("Do you want to apply these changes?")
-        .default(true)
-        .interact()
-        .unwrap()
-    {
-        updated_lines
-    } else {
-        lines
-    }
+    updated_lines
 }
