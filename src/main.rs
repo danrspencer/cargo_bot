@@ -11,7 +11,7 @@ mod model;
 mod parse_error;
 mod update_files;
 
-const SAMPLE: &str = include_str!("../resources/sample.json");
+const _SAMPLE: &str = include_str!("../resources/sample.json");
 
 #[tokio::main]
 async fn main() {
