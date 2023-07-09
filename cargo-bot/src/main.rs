@@ -1,17 +1,16 @@
-use std::time::Duration;
-
 use dialoguer::{theme::ColorfulTheme, Confirm};
 use indicatif::ProgressBar;
 use model::request::Request;
+use std::time::Duration;
 use tokio::select;
 
 mod api;
 mod cargo;
-mod model;
+pub mod model;
 mod parse_error;
 mod update_files;
 
-const _SAMPLE: &str = include_str!("../resources/sample.json");
+// const _SAMPLE: &str = include_str!("../../resources/sample.json");
 
 #[tokio::main]
 async fn main() {

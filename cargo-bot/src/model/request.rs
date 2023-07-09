@@ -1,7 +1,13 @@
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
 const MODEL: &str = "gpt-4-0613";
+
+static UPDATE_FIlES_ARGS_SCHEMA: Lazy<Value> = Lazy::new(|| {
+    let schema = include_str!(concat!(env!("OUT_DIR"), "/update_files_args_schema.json"));
+    serde_json::from_str(schema).unwrap()
+});
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Request {
@@ -51,6 +57,7 @@ impl Request {
             - You can update multiple lines at once
             - Where there is an insert and a delete, prefer a replace
             - When fixing imports, only remove the unnessesary imports (see example below)
+            - Try to fix every error
             - The error field should contain only the error message and not the file path or line number
 
             Unused imports example:
@@ -68,55 +75,8 @@ impl Request {
             functions: vec![Function {
                 name: "update_files".to_string(),
                 description: "Update lines in files".to_string(),
-                parameters: update_files_params(),
+                parameters: UPDATE_FIlES_ARGS_SCHEMA,
             }],
         }
     }
-}
-
-// TODO - Generate this from the struct
-fn update_files_params() -> Value {
-    json!({
-      "type": "object",
-      "required": ["files"],
-      "properties": {
-          "files": {
-              "type": "array",
-              "items": {
-                  "type": "object",
-                  "properties": {
-                    "file": {
-                        "type": "string",
-                        "description": "The path to the file to update"
-                    },
-                    "error": {
-                        "type": "string",
-                        "description": "The first line of the error message that requires fixing"
-                    },
-                    "lines": {
-                        "type": "array",
-                        "items": {
-                        "type": "object",
-                        "properties": {
-                            "line": {
-                            "type": "integer",
-                                "minimum": 1
-                            },
-                            "content": {
-                                "type": "string"
-                            },
-                            "action": {
-                                "type": "string",
-                                "enum": ["insert", "replace", "delete"]
-                            }
-                        },
-                        "required": ["line", "action"]
-                        }
-                    }
-                  },
-                  "required": ["file", "lines", "error"]
-              }
-          }
-      }
-    })
 }

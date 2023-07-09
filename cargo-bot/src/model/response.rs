@@ -1,6 +1,6 @@
 use serde::{Deserialize, Deserializer, Serialize};
 
-use super::update_files::UpdateFilesArgs;
+use cargo_bot_params::update_files::UpdateFilesArgs;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Response {

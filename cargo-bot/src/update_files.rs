@@ -1,4 +1,4 @@
-use crate::model::update_files::{FileUpdate, LineAction, LineUpdate, UpdateFilesArgs};
+use cargo_bot_params::update_files::{FileUpdate, LineAction, LineUpdate, UpdateFilesArgs};
 use colored::*;
 use dialoguer::{theme::ColorfulTheme, Confirm};
 use difference::{Changeset, Difference};

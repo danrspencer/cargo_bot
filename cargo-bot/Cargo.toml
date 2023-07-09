@@ -1,0 +1,26 @@
+[package]
+name = "cargo-bot"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cargo-bot-params = { path = "../cargo-bot-params" }
+
+chrono.workspace = true
+colored.workspace = true
+difference.workspace = true
+dialoguer.workspace = true
+indicatif.workspace = true
+once_cell.workspace = true
+regex.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+strip-ansi-escapes.workspace = true
+tokio.workspace = true
+
+[build-dependencies]
+cargo-bot-params = { path = "../cargo-bot-params" }
+
+serde_json.workspace = true
+schemars.workspace = true
