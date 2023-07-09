@@ -1,30 +1,40 @@
+use crate::model;
 use crate::model::response::Response;
 use serde::Serialize;
 
 const URL: &str = "https://api.openai.com/v1/chat/completions";
-const TOKEN: &str = "*****";
 
 const DEBUG: bool = true;
 
-pub async fn send_request<T: Serialize>(body: &T) -> Response {
+pub async fn send_request<T: Serialize>(
+    body: &T,
+    api_key: String,
+) -> Result<Response, model::error::Error> {
     let client = reqwest::Client::new();
 
     let res = client
         .post(URL)
-        .basic_auth("", Some(TOKEN.to_string()))
+        .basic_auth("", Some(api_key))
         .json(body)
         .send()
         .await
         .unwrap();
 
+    let success = res.status().is_success();
     let result = res.text().await.unwrap();
+
+    if !success {
+        let error = serde_json::from_str::<model::error::ErrorResponse>(&result).expect(&result);
+
+        return Err(error.error);
+    }
+
     let response = serde_json::from_str(&result);
 
     if DEBUG {
         let timestamp = chrono::Local::now().format("%Y%m%d%H%M%S");
-        let ext = if response.is_err() { "err" } else { "json" };
         let path = "/tmp/cargo_bot_debug";
-        let filepath = format!("{}/{}.{}", path, timestamp, ext);
+        let filepath = format!("{}/{}.json", path, timestamp);
 
         println!("🤖 saving debug output to {}", filepath);
 
@@ -38,5 +48,5 @@ pub async fn send_request<T: Serialize>(body: &T) -> Response {
         std::fs::write(&filepath, text).expect("Couldn't write response file");
     }
 
-    response.unwrap()
+    Ok(response.unwrap())
 }

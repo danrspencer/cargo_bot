@@ -1,3 +1,4 @@
+use config::Config;
 use dialoguer::{theme::ColorfulTheme, Confirm};
 use indicatif::ProgressBar;
 use model::request::Request;
@@ -6,7 +7,8 @@ use tokio::select;
 
 mod api;
 mod cargo;
-pub mod model;
+mod config;
+mod model;
 mod parse_error;
 mod update_files;
 
@@ -14,6 +16,8 @@ mod update_files;
 
 #[tokio::main]
 async fn main() {
+    let config = Config::init();
+
     for cmd in &[cargo::check, cargo::build, cargo::clippy] {
         let output = cmd();
         let errors = parse_error::parse_errors(&output);
@@ -36,7 +40,7 @@ async fn main() {
         }
 
         let request = Request::new(errors);
-        let mut request_fut = Box::pin(api::send_request(&request));
+        let mut request_fut = Box::pin(api::send_request(&request, config.api_key.clone()));
 
         let spinner = ProgressBar::new_spinner();
         spinner.set_message("🤖 thinking ...");
@@ -54,9 +58,17 @@ async fn main() {
             }
         };
 
+        let result = match result {
+            Ok(result) => result,
+            Err(e) => {
+                println!("🤖 {:?}", e);
+                break;
+            }
+        };
+
         match &result.choices[0].message.function_call {
             Some(model::response::FunctionCall::UpdateFiles(args)) => {
-                update_files::update_files(args);
+                update_files::update_files(&args);
             }
             None => {
                 println!("🤖 no changes to make!");
