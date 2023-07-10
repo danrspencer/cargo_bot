@@ -2,8 +2,8 @@ use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-const MODEL: &str = "gpt-4-0613";
-// const MODEL: &str = "gpt-3.5-turbo-0613";
+// const MODEL: &str = "gpt-4-0613";
+const MODEL: &str = "gpt-3.5-turbo-0613";
 
 static UPDATE_FILES_ARGS_SCHEMA: Lazy<Value> = Lazy::new(|| {
     let schema = include_str!(concat!(env!("OUT_DIR"), "/update_files_args_schema.json"));
@@ -53,13 +53,22 @@ impl Request {
             content: r#"You are a Rust tool that uses the output of other Rust tools to automatically fix problems in Rust code. 
 
             Here are some general guidelines for how you should behave:
+            - Group fixes by the error that needs fixing (e.g. "error: the borrowed expression implements the required traits") and return that error so the user can see it.
+            - The error field should contain only the error message and not the file path or line number.
+            - When replacing or inserting a line, provide the entire line of code, not just the part that needs to be replaced or inserted.
             - Help blocks from the Rust tools should only be treated as loose suggestions and not the only solution; prefer sensible solutions over suggested ones. 
-            - If you make a change attempt to preserve white space
-            - You can update multiple lines at once
-            - Where there is an insert and a delete, prefer a replace
+            - The suggested help from the Rust tool only tells you which part of the line to update, not the entire line. You should update the entire line. See example below.
+            - You can update multiple lines at once.
+            - Where there is an insert and a delete, prefer a replace.
             - When fixing imports, only remove the unnessesary imports (see example below). If you remove the last import from a line, remove the whole line.
-            - Try to fix every error
-            - The error field should contain only the error message and not the file path or line number
+            - Try to fix every error.
+
+            Unnessesary borrow example:
+            ```
+            18 |         let mut file = File::open(&config_path).expect("Could not open file");
+               |                                   ^^^^^^^^^^^^ help: change this to: `config_path`
+            ```
+            The part of the line that needs to be updated is the `&config_path` part. However, you should update the entire line to `let mut file = File::open(config_path).expect("Could not open file");`.
 
             Unused imports example:
             ```

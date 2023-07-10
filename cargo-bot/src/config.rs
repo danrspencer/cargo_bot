@@ -15,7 +15,7 @@ impl Config {
             .join(".cargo")
             .join("cargo-bot-config.toml");
 
-        let mut file = File::open(&config_path).expect("Could not open file");
+        let mut file = File::open(config_path).expect("Could not open file");
         let mut contents = String::new();
         file.read_to_string(&mut contents)
             .expect("Could not read file");
