@@ -43,7 +43,7 @@ async fn main() {
         let mut request_fut = Box::pin(api::send_request(&request, config.api_key.clone()));
 
         let spinner = ProgressBar::new_spinner();
-        spinner.set_message("🤖 thinking ...");
+        spinner.set_message(format!("🤖 thinking ... ({})", model::request::MODEL));
         let mut interval = tokio::time::interval(Duration::from_millis(50));
 
         // let result: Response = serde_json::from_str(SAMPLE).unwrap();

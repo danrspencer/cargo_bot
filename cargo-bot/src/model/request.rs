@@ -2,8 +2,8 @@ use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-// const MODEL: &str = "gpt-4-0613";
-const MODEL: &str = "gpt-3.5-turbo-0613";
+// pub const MODEL: &str = "gpt-4-0613";
+pub const MODEL: &str = "gpt-3.5-turbo-0613";
 
 static UPDATE_FILES_ARGS_SCHEMA: Lazy<Value> = Lazy::new(|| {
     let schema = include_str!(concat!(env!("OUT_DIR"), "/update_files_args_schema.json"));
