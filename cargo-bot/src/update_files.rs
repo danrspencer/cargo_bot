@@ -70,13 +70,13 @@ fn apply_patch(file: &str, line_update: &LineUpdate, lines: &[String]) -> Vec<St
     match line_update.action {
         LineAction::Insert => {
             if let Some(ref content) = line_update.content {
-                let index = line_update.line as usize - 1;
+                let index = line_update.line_no as usize - 1;
                 updated_lines.insert(index, content.clone());
             }
         }
         LineAction::Replace => {
             if let Some(ref content) = line_update.content {
-                let index = line_update.line as usize - 1;
+                let index = line_update.line_no as usize - 1;
                 // Replace
                 *updated_lines
                     .get_mut(index)
@@ -85,7 +85,7 @@ fn apply_patch(file: &str, line_update: &LineUpdate, lines: &[String]) -> Vec<St
             }
         }
         LineAction::Delete => {
-            let index = line_update.line as usize - 1;
+            let index = line_update.line_no as usize - 1;
 
             updated_lines.remove(index);
         }

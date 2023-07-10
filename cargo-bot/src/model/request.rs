@@ -1,9 +1,9 @@
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::Value;
 
-// const MODEL: &str = "gpt-4-0613";
-const MODEL: &str = "gpt-3.5-turbo-0613";
+const MODEL: &str = "gpt-4-0613";
+// const MODEL: &str = "gpt-3.5-turbo-0613";
 
 static UPDATE_FILES_ARGS_SCHEMA: Lazy<Value> = Lazy::new(|| {
     let schema = include_str!(concat!(env!("OUT_DIR"), "/update_files_args_schema.json"));
@@ -57,7 +57,7 @@ impl Request {
             - If you make a change attempt to preserve white space
             - You can update multiple lines at once
             - Where there is an insert and a delete, prefer a replace
-            - When fixing imports, only remove the unnessesary imports (see example below)
+            - When fixing imports, only remove the unnessesary imports (see example below). If you remove the last import from a line, remove the whole line.
             - Try to fix every error
             - The error field should contain only the error message and not the file path or line number
 

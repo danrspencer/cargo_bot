@@ -29,7 +29,7 @@ pub async fn send_request<T: Serialize>(
         return Err(error.error);
     }
 
-    let response = serde_json::from_str(&result);
+    let response = serde_json::from_str::<model::response::Response>(&result);
 
     if DEBUG {
         let timestamp = chrono::Local::now().format("%Y%m%d%H%M%S");

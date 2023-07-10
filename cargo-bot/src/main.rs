@@ -68,7 +68,7 @@ async fn main() {
 
         match &result.choices[0].message.function_call {
             Some(model::response::FunctionCall::UpdateFiles(args)) => {
-                update_files::update_files(&args);
+                update_files::update_files(args);
             }
             None => {
                 println!("🤖 no changes to make!");

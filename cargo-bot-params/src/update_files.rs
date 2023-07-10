@@ -8,15 +8,21 @@ pub struct UpdateFilesArgs {
 
 #[derive(Serialize, Deserialize, Debug, JsonSchema)]
 pub struct FileUpdate {
-    pub file: String,
+    /// The original error message that needs to be fixed.
     pub error: String,
+    /// The file to be updated.
+    pub file: String,
+    /// The lines to be updated.
     pub lines: Vec<LineUpdate>,
 }
 
 #[derive(Serialize, Deserialize, Debug, JsonSchema)]
 pub struct LineUpdate {
-    pub line: i32,
+    /// The line number to be updated
+    pub line_no: i32,
+    /// The content of the line to be updated
     pub content: Option<String>,
+    /// The action to be taken on the line
     pub action: LineAction,
 }
 
