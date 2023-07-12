@@ -64,7 +64,7 @@ impl Request {
             temperature: 0.1,
             messages,
             functions: vec![Function {
-                name: "update_files".to_string(),
+                name: stringify!(update_file).to_string(),
                 description: "Update lines in files".to_string(),
                 parameters: UPDATE_FILES_ARGS_SCHEMA.clone(),
             }],
