@@ -33,7 +33,6 @@ pub struct Message {
     pub function_call: Option<FunctionCall>,
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "name", content = "arguments", rename_all = "snake_case")]
 pub enum FunctionCall {
@@ -52,36 +51,55 @@ where
 
 #[cfg(test)]
 mod test {
+    use cargo_bot_params::update_files::{FileUpdate, LineAction, LineUpdate};
+    use serde_json::json;
+
     use super::*;
 
     #[test]
     fn it_parses_a_response() {
-        let response = r#"{
-            "id": "chatcmpl-7Zht9Xvqn1j96D9NisM76cTJkXG1K",
-            "object": "chat.completion",
-            "created": 1688744543,
-            "model": "gpt-4-0613",
-            "choices": [
-              {
-                "index": 0,
-                "message": {
-                  "role": "assistant",
-                  "content": null,
-                  "function_call": {
-                    "name": "update_files",
-                    "arguments": "{\n  \"files\": [\n    {\n      \"file\": \"src/api.rs\",\n      \"lines\": [\n        {\n          \"action\": \"replace\",\n          \"content\": \"\",\n          \"line\": 2\n        }\n      ]\n    },\n    {\n      \"file\": \"src/update_files.rs\",\n      \"lines\": [\n        {\n          \"action\": \"replace\",\n          \"content\": \"// pub fn update_files(args: UpdateFilesArgs) {\",\n          \"line\": 3\n        }\n      ]\n    },\n    {\n      \"file\": \"src/model/request.rs\",\n      \"lines\": [\n        {\n          \"action\": \"replace\",\n          \"content\": \"content: error,\",\n          \"line\": 40\n        }\n      ]\n    }\n  ]\n}"
-                  }
-                },
-                "finish_reason": "function_call"
-              }
-            ],
-            "usage": {
-              "prompt_tokens": 387,
-              "completion_tokens": 163,
-              "total_tokens": 550
-            }
-          }"#;
+        let fn_name = stringify!(update_file);
+        let args = serde_json::to_string(&UpdateFilesArgs {
+            files: vec![FileUpdate {
+                cause: "oh no - something broke".to_string(),
+                file: "hello.ts".to_string(),
+                lines: vec![LineUpdate {
+                    line_no: 10,
+                    content: Some("test".to_string()),
+                    action: LineAction::Replace,
+                }],
+            }],
+        })
+        .unwrap();
 
-        serde_json::from_str::<Response>(response).unwrap();
+        let response = json!({
+          "id": "chatcmpl-7Zht9Xvqn1j96D9NisM76cTJkXG1K",
+          "object": "chat.completion",
+          "created": 1688744543,
+          "model": "gpt-4-0613",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": null,
+                "function_call": {
+                  "name": fn_name,
+                  "arguments": args
+                }
+              },
+              "finish_reason": "function_call"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 387,
+            "completion_tokens": 163,
+            "total_tokens": 550
+          }
+        });
+
+        let response_str = serde_json::to_string(&response).unwrap();
+
+        serde_json::from_str::<Response>(&response_str).unwrap();
     }
 }
