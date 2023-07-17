@@ -15,6 +15,8 @@ pub fn update_files(args: &UpdateFilesArgs) {
 }
 
 fn update_file(file_update: &FileUpdate) -> Vec<String> {
+    // TODO - do workspaces show the path differently?
+    // might need to handle various ways gpt can return the path
     let path = Path::new(&file_update.file);
     let mut lines: Vec<String> = {
         let file = OpenOptions::new().read(true).open(path).unwrap();
@@ -24,9 +26,9 @@ fn update_file(file_update: &FileUpdate) -> Vec<String> {
 
     println!();
 
-    let (mut error, message) = file_update
-        .error
-        .split_at(file_update.error.find(':').unwrap_or(0));
+    let err_message = file_update.cause.clone();
+
+    let (mut error, message) = err_message.split_at(err_message.find(':').unwrap_or(0));
     if error.is_empty() {
         error = "error";
     }

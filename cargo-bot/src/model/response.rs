@@ -37,7 +37,7 @@ pub struct Message {
 #[serde(tag = "name", content = "arguments", rename_all = "snake_case")]
 pub enum FunctionCall {
     #[serde(deserialize_with = "deserialize_update_files_args")]
-    UpdateFiles(UpdateFilesArgs),
+    UpdateFile(UpdateFilesArgs),
 }
 
 fn deserialize_update_files_args<'de, D>(deserializer: D) -> Result<UpdateFilesArgs, D::Error>

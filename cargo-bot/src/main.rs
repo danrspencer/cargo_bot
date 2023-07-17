@@ -67,7 +67,7 @@ async fn main() {
         };
 
         match &result.choices[0].message.function_call {
-            Some(model::response::FunctionCall::UpdateFiles(args)) => {
+            Some(model::response::FunctionCall::UpdateFile(args)) => {
                 update_files::update_files(args);
             }
             None => {

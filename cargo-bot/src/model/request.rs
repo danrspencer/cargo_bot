@@ -61,7 +61,7 @@ impl Request {
 
         Self {
             model: MODEL.to_string(),
-            temperature: 0.1,
+            temperature: 0.0,
             messages,
             functions: vec![Function {
                 name: stringify!(update_file).to_string(),

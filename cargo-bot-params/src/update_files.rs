@@ -8,8 +8,8 @@ pub struct UpdateFilesArgs {
 
 #[derive(Serialize, Deserialize, Debug, JsonSchema)]
 pub struct FileUpdate {
-    /// The original error message that needs to be fixed.
-    pub error: String,
+    /// The original error message that was returned from the compiler.
+    pub cause: String,
     /// The file to be updated.
     pub file: String,
     /// The lines to be updated.
