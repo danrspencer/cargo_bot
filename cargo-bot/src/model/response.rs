@@ -33,9 +33,11 @@ pub struct Message {
     pub function_call: Option<FunctionCall>,
 }
 
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "name", content = "arguments", rename_all = "snake_case")]
 pub enum FunctionCall {
+    // TODO - Force these enums to match up with the provided function names to GPT
     #[serde(deserialize_with = "deserialize_update_files_args")]
     UpdateFile(UpdateFilesArgs),
 }
