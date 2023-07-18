@@ -1,6 +1,7 @@
 use cargo_bot_params::update_files::{FileUpdate, LineAction, LineUpdate, UpdateFilesArgs};
 use colored::*;
 use dialoguer::{theme::ColorfulTheme, Confirm};
+use serde_json::value::Index;
 use std::{
     fs::OpenOptions,
     io::{BufRead, BufReader},
@@ -20,39 +21,67 @@ pub fn update_files(args: &UpdateFilesArgs) {
     }
 }
 
-fn update_file<C: Cli>(file_update: &FileUpdate, lines: Vec<String>) -> Vec<String> {
+fn update_file<C: Cli>(file_update: &FileUpdate, mut lines: Vec<String>) -> Vec<String> {
     C::display_error(&file_update.cause);
 
-    for line_update in &file_update.lines {
-        let updated_lines = show_patch(&file_update.file, line_update, &lines);
+    let confirmed_line_updates = file_update
+        .lines
+        .iter()
+        .filter(|line_update| confirm_update(&file_update.file, line_update, &lines))
+        .collect::<Vec<_>>();
 
-        if Confirm::with_theme(&ColorfulTheme::default())
-            .with_prompt("Do you want to apply these changes?")
-            .default(true)
-            .interact()
-            .unwrap()
-        {
-            // //
+    // TODO - We need to keep track of any lines added / removed so we're updating the correct line numbers on subsequent patches
+    for line_update in confirmed_line_updates {
+        let index = line_update.line_no as usize - 1;
 
-            // let mut file = OpenOptions::new()
-            //     .write(true)
-            //     .truncate(true)
-            //     .open(path)
-            //     .unwrap();
-
-            // for line in &updated_lines {
-            //     writeln!(file, "{}", line).unwrap();
-            // }
-
-            // lines = updated_lines;
+        match line_update.action {
+            LineAction::Insert => {
+                if let Some(ref content) = line_update.content {
+                    lines.insert(index, content.clone());
+                }
+            }
+            LineAction::Replace => {
+                if let (Some(ref content), Some(line)) =
+                    (&line_update.content, lines.get_mut(index))
+                {
+                    *line = content.clone();
+                }
+            }
+            LineAction::Delete => {
+                lines.remove(index);
+            }
         }
     }
 
     lines
+
+    // for line_update in &file_update.lines {
+    //     let updated_lines = show_patch(&file_update.file, line_update, &lines);
+
+    //     if Confirm::with_theme(&ColorfulTheme::default())
+    //         .with_prompt("Do you want to apply these changes?")
+    //         .default(true)
+    //         .interact()
+    //         .unwrap()
+    //     {
+    // //
+
+    // let mut file = OpenOptions::new()
+    //     .write(true)
+    //     .truncate(true)
+    //     .open(path)
+    //     .unwrap();
+
+    // for line in &updated_lines {
+    //     writeln!(file, "{}", line).unwrap();
+    // }
+
+    // lines = updated_lines;
+    //     }
+    // }
 }
 
-// TODO - We need to keep track of any lines added / removed so we're updating the correct line numbers on subsequent patches
-fn show_patch(file: &str, line_update: &LineUpdate, lines: &[String]) -> Vec<String> {
+fn confirm_update(file: &str, line_update: &LineUpdate, lines: &[String]) -> bool {
     let index = line_update.line_no as usize - 1;
     let indent = " ".repeat(index.to_string().len());
 
@@ -97,80 +126,11 @@ fn show_patch(file: &str, line_update: &LineUpdate, lines: &[String]) -> Vec<Str
         }
     }
 
-    // if let Some((line, change)) = change {
-    //     let indent_size = vec![original_line_no, updated_line_no, line]
-    //         .iter()
-    //         .max()
-    //         .unwrap()
-    //         .to_string()
-    //         .len();
-    //     let indent = " ".repeat(indent_size);
-
-    //     if original_line_no - last_change_line_no > 1 {
-    //         println!(
-    //             "{}{} {}:{}",
-    //             indent,
-    //             "-->".bright_blue().bold(),
-    //             file,
-    //             original_line_no
-    //         );
-    //     }
-    //     println!("{} {}", format!("{} |", line).bright_blue().bold(), change);
-    //     last_change_line_no = original_line_no;
-    // }
-
-    // Generate diff
-    // let original_contents = lines.join("\n");
-    // let updated_contents = updated_lines.join("\n");
-    // let changeset = Changeset::new(&original_contents, &updated_contents, "\n");
-
-    // let mut original_line_no = 1;
-    // let mut updated_line_no = 1;
-
-    // let mut last_change_line_no = 0;
-
-    // for diff in &changeset.diffs {
-    //     let change = match diff {
-    //         Difference::Same(ref x) => {
-    //             let lines = x.matches('\n').count() + 1;
-    //             original_line_no += lines;
-    //             updated_line_no += lines;
-    //             None
-    //         }
-    //         Difference::Add(ref x) => {
-    //             updated_line_no += 1;
-    //             Some((updated_line_no - 1, format!("+{}", x).green()))
-    //         }
-    //         Difference::Rem(ref x) => {
-    //             original_line_no += 1;
-    //             Some((original_line_no - 1, format!("-{}", x).red()))
-    //         }
-    //     };
-
-    //     if let Some((line, change)) = change {
-    //         let indent_size = vec![original_line_no, updated_line_no, line]
-    //             .iter()
-    //             .max()
-    //             .unwrap()
-    //             .to_string()
-    //             .len();
-    //         let indent = " ".repeat(indent_size);
-
-    //         if original_line_no - last_change_line_no > 1 {
-    //             println!(
-    //                 "{}{} {}:{}",
-    //                 indent,
-    //                 "-->".bright_blue().bold(),
-    //                 file,
-    //                 original_line_no
-    //             );
-    //         }
-    //         println!("{} {}", format!("{} |", line).bright_blue().bold(), change);
-    //         last_change_line_no = original_line_no;
-    //     }
-    // }
-
-    unimplemented!()
+    Confirm::with_theme(&ColorfulTheme::default())
+        .with_prompt("Do you want to apply these changes?")
+        .default(true)
+        .interact()
+        .unwrap()
 }
 
 trait Cli {
@@ -200,7 +160,6 @@ impl Cli for UserCli {
 mod test {
     use super::*;
     use cargo_bot_params::update_files::UpdateFilesArgs;
-    use serde_json::json;
 
     #[test]
     fn it_shows_diff() {
