@@ -29,7 +29,11 @@ pub struct LineUpdate {
 #[derive(Serialize, Deserialize, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum LineAction {
+    /// Replace the contents of the line
     Replace,
+    /// Insert a line below the given line number
+    /// (e.g. insert at line 3 it will become the new line 3 and the old line 3 will become line 4)
     Insert,
+    /// Delete the line
     Delete,
 }
