@@ -1,7 +1,6 @@
 use cargo_bot_params::update_files::{FileUpdate, LineAction, LineUpdate, UpdateFilesArgs};
 use colored::*;
 use dialoguer::{theme::ColorfulTheme, Confirm};
-use serde_json::value::Index;
 use std::{
     fs::OpenOptions,
     io::{BufRead, BufReader},
@@ -17,13 +16,24 @@ pub fn update_files(args: &UpdateFilesArgs) {
             reader.lines().collect::<Result<_, _>>().unwrap()
         };
 
-        update_file::<UserCli>(file_update, lines);
+        let updated_lines = update_lines::<UserCli>(file_update, lines);
+
+        let mut file = OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .open(path)
+            .unwrap();
+
+        for line in &updated_lines {
+            writeln!(file, "{}", line).unwrap();
+        }
     }
 }
 
-fn update_file<C: Cli>(file_update: &FileUpdate, mut lines: Vec<String>) -> Vec<String> {
+fn update_lines<C: Cli>(file_update: &FileUpdate, mut lines: Vec<String>) -> Vec<String> {
     C::display_error(&file_update.cause);
 
+    // TODO - We need to abstract away the confirming updates to make this function deterministic in tests
     let confirmed_line_updates = file_update
         .lines
         .iter()
@@ -54,31 +64,6 @@ fn update_file<C: Cli>(file_update: &FileUpdate, mut lines: Vec<String>) -> Vec<
     }
 
     lines
-
-    // for line_update in &file_update.lines {
-    //     let updated_lines = show_patch(&file_update.file, line_update, &lines);
-
-    //     if Confirm::with_theme(&ColorfulTheme::default())
-    //         .with_prompt("Do you want to apply these changes?")
-    //         .default(true)
-    //         .interact()
-    //         .unwrap()
-    //     {
-    // //
-
-    // let mut file = OpenOptions::new()
-    //     .write(true)
-    //     .truncate(true)
-    //     .open(path)
-    //     .unwrap();
-
-    // for line in &updated_lines {
-    //     writeln!(file, "{}", line).unwrap();
-    // }
-
-    // lines = updated_lines;
-    //     }
-    // }
 }
 
 fn confirm_update(file: &str, line_update: &LineUpdate, lines: &[String]) -> bool {
@@ -183,6 +168,6 @@ mod test {
             .map(|i| format!("line {}", i.to_string()))
             .collect::<Vec<String>>();
 
-        update_file::<UserCli>(&update_files.files[0], lines);
+        update_lines::<UserCli>(&update_files.files[0], lines);
     }
 }
