@@ -77,4 +77,6 @@ async fn main() {
     }
 
     cargo::fmt();
+
+    // TODO - If there are no uncommited changes, ask if cargo bot should amend the previous commit
 }
