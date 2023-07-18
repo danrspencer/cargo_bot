@@ -102,7 +102,7 @@ checksum = "89b2fd2a0dcf38d7971e2194b6b6eebab45ae01067456a7fd93d5547a61b70be"
 name = "cargo-bot"
 version = "0.1.0"
 dependencies = [
- "cargo-bot-params",
+ "cargo-bot-functions",
  "chrono",
  "colored",
  "dialoguer",
@@ -120,11 +120,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "cargo-bot-params"
+name = "cargo-bot-functions"
 version = "0.1.0"
 dependencies = [
+ "chrono",
+ "colored",
+ "dialoguer",
+ "difference",
+ "indicatif",
+ "once_cell",
+ "regex",
+ "reqwest",
  "schemars",
  "serde",
+ "serde_json",
+ "strip-ansi-escapes",
+ "tokio",
+ "toml",
 ]
 
 [[package]]

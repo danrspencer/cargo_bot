@@ -1,4 +1,4 @@
-use cargo_bot_params::update_files::UpdateFilesArgs;
+use cargo_bot_functions::update_files::UpdateFilesArgs;
 use schemars::gen::SchemaGenerator;
 use serde_json::json;
 use std::env;

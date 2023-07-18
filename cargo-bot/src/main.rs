@@ -9,9 +9,6 @@ mod api;
 mod cargo;
 mod config;
 mod model;
-mod update_files;
-
-// const _SAMPLE: &str = include_str!("../../resources/sample.json");
 
 #[tokio::main]
 async fn main() {
@@ -44,8 +41,6 @@ async fn main() {
         spinner.set_message(format!("🤖 thinking ... ({})", model::request::MODEL));
         let mut interval = tokio::time::interval(Duration::from_millis(50));
 
-        // let result: Response = serde_json::from_str(SAMPLE).unwrap();
-
         let result = loop {
             select! {
                 result = &mut request_fut => {
@@ -66,7 +61,7 @@ async fn main() {
 
         match &result.choices[0].message.function_call {
             Some(model::response::FunctionCall::UpdateFile(args)) => {
-                update_files::update_files(args);
+                cargo_bot_functions::update_files::update_files(args);
             }
             None => {
                 println!("🤖 no changes to make!");

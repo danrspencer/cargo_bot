@@ -1,6 +1,5 @@
+use cargo_bot_functions::update_files::UpdateFilesArgs;
 use serde::{Deserialize, Deserializer, Serialize};
-
-use cargo_bot_params::update_files::UpdateFilesArgs;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Response {
@@ -37,11 +36,11 @@ pub struct Message {
 #[serde(tag = "name", content = "arguments", rename_all = "snake_case")]
 pub enum FunctionCall {
     // TODO - Force these enums to match up with the provided function names to GPT
-    #[serde(deserialize_with = "deserialize_update_files_args")]
+    #[serde(deserialize_with = "deserialize_nested_json")]
     UpdateFile(UpdateFilesArgs),
 }
 
-fn deserialize_update_files_args<'de, D>(deserializer: D) -> Result<UpdateFilesArgs, D::Error>
+fn deserialize_nested_json<'de, D>(deserializer: D) -> Result<UpdateFilesArgs, D::Error>
 where
     D: Deserializer<'de>,
 {

@@ -1,11 +1,11 @@
 [package]
-name = "cargo-bot"
+name = "cargo-bot-functions"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-cargo-bot-functions = { path = "../cargo-bot-functions" }
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[dependencies]
 chrono.workspace = true
 colored.workspace = true
 dialoguer.workspace = true
@@ -14,14 +14,9 @@ indicatif.workspace = true
 once_cell.workspace = true
 regex.workspace = true
 reqwest.workspace = true
+schemars.workspace = true
 serde_json.workspace = true
 serde.workspace = true
 strip-ansi-escapes.workspace = true
 tokio.workspace = true
 toml.workspace = true
-
-[build-dependencies]
-cargo-bot-functions = { path = "../cargo-bot-functions" }
-
-serde_json.workspace = true
-schemars.workspace = true

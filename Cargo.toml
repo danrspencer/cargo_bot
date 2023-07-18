@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 
-members = ["cargo-bot", "cargo-bot-params"]
+members = ["cargo-bot", "cargo-bot-functions"]
 
 [workspace.dependencies]
 chrono = { version = "0.4", features = ["serde"] }
