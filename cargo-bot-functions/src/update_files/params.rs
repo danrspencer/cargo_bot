@@ -2,7 +2,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, JsonSchema)]
-pub struct UpdateFilesArgs {
+pub struct UpdateFilesParams {
     pub files: Vec<FileUpdate>,
 }
 
@@ -20,7 +20,8 @@ pub struct FileUpdate {
 pub struct LineUpdate {
     /// The line number to be updated
     pub line_no: i32,
-    /// The content of the line to be updated
+    /// The content of the line to be updated. Attempt to preserve white space if replacing.
+    /// The white space ios everything between the | and the start of the line of code.
     pub content: Option<String>,
     /// The action to be taken on the line
     pub action: LineAction,

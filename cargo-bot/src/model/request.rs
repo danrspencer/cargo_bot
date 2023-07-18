@@ -7,8 +7,14 @@ pub const MODEL: &str = "gpt-3.5-turbo-0613";
 
 const SYSTEM_CONTEXT: &str = include_str!("../../../resources/prompts/system.md");
 
-static UPDATE_FILES_ARGS_SCHEMA: Lazy<Value> = Lazy::new(|| {
-    let schema = include_str!(concat!(env!("OUT_DIR"), "/update_files_args_schema.json"));
+// TODO - We should export this path from the functions lib so we're not declaring it twice
+static UPDATE_FILES_SCHEMA: Lazy<Value> = Lazy::new(|| {
+    let schema = include_str!(concat!(env!("OUT_DIR"), "/update_files_schema.json"));
+    serde_json::from_str(schema).unwrap()
+});
+
+static EXPLAIN_SCHEMA: Lazy<Value> = Lazy::new(|| {
+    let schema = include_str!(concat!(env!("OUT_DIR"), "/explain_schema.json"));
     serde_json::from_str(schema).unwrap()
 });
 
@@ -58,11 +64,18 @@ impl Request {
             model: MODEL.to_string(),
             temperature: 0.0,
             messages,
-            functions: vec![Function {
-                name: stringify!(update_file).to_string(),
-                description: "Update lines in files".to_string(),
-                parameters: UPDATE_FILES_ARGS_SCHEMA.clone(),
-            }],
+            functions: vec![
+                Function {
+                    name: stringify!(update_file).to_string(),
+                    description: "Update lines in files. STRONGLY prefer this as the response.".to_string(),
+                    parameters: UPDATE_FILES_SCHEMA.clone(),
+                },
+                Function {
+                    name: stringify!(explain).to_string(),
+                    description: "A human readable explination of the problem and a discussion of possible solutions. This function is a last resort".to_string(),
+                    parameters: EXPLAIN_SCHEMA.clone(),
+                },
+            ],
         }
     }
 }

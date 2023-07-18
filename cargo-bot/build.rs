@@ -1,4 +1,5 @@
-use cargo_bot_functions::update_files::UpdateFilesArgs;
+use cargo_bot_functions::explain::ExplainParams;
+use cargo_bot_functions::update_files::UpdateFilesParams;
 use schemars::gen::SchemaGenerator;
 use serde_json::json;
 use std::env;
@@ -10,10 +11,23 @@ fn main() {
     let mut schema_settings = schemars::gen::SchemaSettings::draft07();
     schema_settings.inline_subschemas = true;
 
-    let schema = SchemaGenerator::new(schema_settings).into_root_schema_for::<UpdateFilesArgs>();
-    let schema_json = json!(schema);
+    let schemars = vec![
+        (
+            "update_files_schema.json",
+            SchemaGenerator::new(schema_settings.clone())
+                .into_root_schema_for::<UpdateFilesParams>(),
+        ),
+        (
+            "explain_schema.json",
+            SchemaGenerator::new(schema_settings).into_root_schema_for::<ExplainParams>(),
+        ),
+    ];
 
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let dest_path = Path::new(&out_dir).join("update_files_args_schema.json");
-    fs::write(dest_path, schema_json.to_string()).unwrap();
+    for (filename, schema) in schemars {
+        let schema_json = json!(schema);
+
+        let out_dir = env::var("OUT_DIR").unwrap();
+        let dest_path = Path::new(&out_dir).join(filename);
+        fs::write(dest_path, schema_json.to_string()).unwrap();
+    }
 }

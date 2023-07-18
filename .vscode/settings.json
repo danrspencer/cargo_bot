@@ -4,6 +4,12 @@
         "./cargo-bot/Cargo.toml",
         "./cargo-bot/Cargo.toml",
         "./cargo-bot-functions/Cargo.toml",
+        "./cargo-bot-functions/Cargo.toml",
+        "./cargo-bot-functions/Cargo.toml",
+        "./cargo-bot-functions/Cargo.toml",
+        "./cargo-bot-functions/Cargo.toml",
+        "./cargo-bot-functions/Cargo.toml",
+        "./cargo-bot-functions/Cargo.toml",
         "./cargo-bot-functions/Cargo.toml"
     ]
 }

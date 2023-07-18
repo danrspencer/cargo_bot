@@ -9,7 +9,7 @@ use std::{
 mod cli;
 mod params;
 
-pub fn update_files(args: &UpdateFilesArgs) {
+pub fn update_files(args: &UpdateFilesParams) {
     for file_update in &args.files {
         let path = Path::new(&file_update.file);
         let lines = {

@@ -1,5 +1,5 @@
-use cargo_bot_functions::update_files::UpdateFilesArgs;
-use serde::{Deserialize, Deserializer, Serialize};
+use cargo_bot_functions::{explain::ExplainParams, update_files::UpdateFilesParams};
+use serde::{de::DeserializeOwned, Deserialize, Deserializer, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Response {
@@ -37,12 +37,15 @@ pub struct Message {
 pub enum FunctionCall {
     // TODO - Force these enums to match up with the provided function names to GPT
     #[serde(deserialize_with = "deserialize_nested_json")]
-    UpdateFile(UpdateFilesArgs),
+    UpdateFile(UpdateFilesParams),
+    #[serde(deserialize_with = "deserialize_nested_json")]
+    Explain(ExplainParams),
 }
 
-fn deserialize_nested_json<'de, D>(deserializer: D) -> Result<UpdateFilesArgs, D::Error>
+fn deserialize_nested_json<'de, D, T>(deserializer: D) -> Result<T, D::Error>
 where
     D: Deserializer<'de>,
+    T: DeserializeOwned,
 {
     let s: String = Deserialize::deserialize(deserializer)?;
     serde_json::from_str(&s).map_err(serde::de::Error::custom)
@@ -58,7 +61,7 @@ mod test {
     #[test]
     fn it_parses_a_response() {
         let fn_name = stringify!(update_file);
-        let args = serde_json::to_string(&UpdateFilesArgs {
+        let args = serde_json::to_string(&UpdateFilesParams {
             files: vec![FileUpdate {
                 cause: "oh no - something broke".to_string(),
                 file: "hello.ts".to_string(),
