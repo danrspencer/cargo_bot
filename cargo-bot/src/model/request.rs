@@ -42,22 +42,17 @@ pub struct Function {
 }
 
 impl Request {
-    pub fn new(errors: Vec<String>) -> Self {
-        let mut messages = errors
-            .into_iter()
-            .map(|error| Message {
-                role: Role::User,
-                content: error,
-            })
-            .collect::<Vec<_>>();
-
-        messages.insert(
-            0,
+    pub fn new(command: String, output: String) -> Self {
+        let messages = vec![
             Message {
                 role: Role::System,
                 content: SYSTEM_CONTEXT.to_string(),
             },
-        );
+            Message {
+                role: Role::User,
+                content: format!("{}\n\n{}", command, output),
+            },
+        ];
 
         Self {
             model: MODEL.to_string(),

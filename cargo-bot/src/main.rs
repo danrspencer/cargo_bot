@@ -9,7 +9,6 @@ mod api;
 mod cargo;
 mod config;
 mod model;
-mod parse_error;
 mod update_files;
 
 // const _SAMPLE: &str = include_str!("../../resources/sample.json");
@@ -19,27 +18,26 @@ async fn main() {
     let config = Config::init();
 
     for cmd in &[cargo::check, cargo::build, cargo::clippy] {
-        let output = cmd();
-        let errors = parse_error::parse_errors(&output);
+        let (cmd_str, result) = cmd();
 
-        if errors.is_empty() {
-            continue;
-        }
+        let output = match result {
+            Ok(()) => {
+                continue;
+            }
+            Err(output) => output,
+        };
 
         println!();
         if !Confirm::with_theme(&ColorfulTheme::default())
-            .with_prompt(format!(
-                "Found {} errors! Phone a friend? 📞🤖",
-                errors.len()
-            ))
+            .with_prompt("Phone a friend? 📞🤖".to_string())
             .default(true)
             .interact()
             .unwrap()
         {
-            continue;
+            break;
         }
 
-        let request = Request::new(errors);
+        let request = Request::new(cmd_str, output);
         let mut request_fut = Box::pin(api::send_request(&request, config.api_key.clone()));
 
         let spinner = ProgressBar::new_spinner();
@@ -74,9 +72,9 @@ async fn main() {
                 println!("🤖 no changes to make!");
             }
         }
+
+        break;
     }
 
-    cargo::fmt();
-
-    // TODO - If there are no uncommited changes, ask if cargo bot should amend the previous commit
+    let _ = cargo::fmt();
 }

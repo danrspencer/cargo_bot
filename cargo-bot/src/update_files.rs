@@ -148,9 +148,9 @@ impl Cli for UserCli {
 mod test {
     use super::*;
 
-    struct MockCli;
+    struct FakeCli;
 
-    impl Cli for MockCli {
+    impl Cli for FakeCli {
         fn display_error(_cause: &str) {}
         fn confirm_update(_file: &str, _line_update: &LineUpdate, _lines: &[String]) -> bool {
             true
@@ -179,7 +179,7 @@ mod test {
             "Line 2".to_string(),
             "Line 3".to_string(),
         ];
-        let result = update_lines::<MockCli>(&file_update, lines);
+        let result = update_lines::<FakeCli>(&file_update, lines);
         assert_eq!(result, expected);
     }
 
@@ -204,7 +204,7 @@ mod test {
             "Hello".to_string(),
             "Line 3".to_string(),
         ];
-        let result = update_lines::<MockCli>(&file_update, lines);
+        let result = update_lines::<FakeCli>(&file_update, lines);
         assert_eq!(result, expected);
     }
 
@@ -225,7 +225,7 @@ mod test {
             "Line 3".to_string(),
         ];
         let expected = vec!["Line 1".to_string(), "Line 3".to_string()];
-        let result = update_lines::<MockCli>(&file_update, lines);
+        let result = update_lines::<FakeCli>(&file_update, lines);
         assert_eq!(result, expected);
     }
     #[test]
@@ -261,7 +261,7 @@ mod test {
             "World".to_string(),
             "Line 3".to_string(),
         ];
-        let result = update_lines::<MockCli>(&file_update, lines);
+        let result = update_lines::<FakeCli>(&file_update, lines);
         assert_eq!(result, expected);
     }
 }

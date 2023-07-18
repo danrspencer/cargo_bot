@@ -3,30 +3,30 @@ use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 use std::thread;
 
-pub fn build() -> String {
+pub fn build() -> (String, Result<(), String>) {
     println!("🤖 cargo build");
-    let args = ["build", "--color=always"];
-    command(&args)
+    let args = ["build", "-q", "--color=always"];
+    (format!("cargo {}", args.join(" ")), command(&args))
 }
 
-pub fn check() -> String {
+pub fn check() -> (String, Result<(), String>) {
     println!("🤖 cargo check");
-    let args = ["check", "--color=always"];
-    command(&args)
+    let args = ["check", "-q", "--color=always"];
+    (format!("cargo {}", args.join(" ")), command(&args))
 }
 
-pub fn clippy() -> String {
+pub fn clippy() -> (String, Result<(), String>) {
     println!("🤖 cargo clippy -- -D warnings");
-    let args = ["clippy", "--color=always", "--", "-D", "warnings"];
-    command(&args)
+    let args = ["clippy", "-q", "--color=always", "--", "-D", "warnings"];
+    (format!("cargo {}", args.join(" ")), command(&args))
 }
 
-pub fn fmt() -> String {
+pub fn fmt() -> (String, Result<(), String>) {
     let args = ["fmt"];
-    command(&args)
+    (format!("cargo {}", args.join(" ")), command(&args))
 }
 
-fn command(args: &[&str]) -> String {
+fn command(args: &[&str]) -> Result<(), String> {
     let current_dir = env::current_dir().expect("failed to get current directory");
 
     let mut child = Command::new("cargo")
@@ -70,11 +70,15 @@ fn command(args: &[&str]) -> String {
         output
     });
 
-    let _ = child.wait();
+    let result = child.wait();
 
     let _stdout_output = stdout_handle.join().unwrap();
     let stderr_output = stderr_handle.join().unwrap();
 
     let stripped = strip_ansi_escapes::strip(stderr_output).unwrap();
-    String::from_utf8(stripped).unwrap()
+
+    match result {
+        Ok(status) if status.success() => Ok(()),
+        _ => Err(String::from_utf8(stripped).unwrap()),
+    }
 }
