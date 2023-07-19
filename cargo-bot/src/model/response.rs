@@ -53,7 +53,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use cargo_bot_params::update_files::{FileUpdate, LineAction, LineUpdate};
+    use cargo_bot_functions::update_files::{FileUpdate, LineAction, LineUpdate};
     use serde_json::json;
 
     use super::*;
