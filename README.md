@@ -19,7 +19,7 @@ To install Cargo Bot, you need to have Rust installed on your machine. If you ha
 With Rust and cargo installed, you can install the Cargo Bot plugin using the following command:
 
 ```bash
-$ cargo install cargo-bot
+$ cargo install --git http://github.com/danrspencer/cargo_bot
 ```
 
 ## Usage
@@ -43,9 +43,6 @@ error: unused variable: `t`
   |             ^ help: if this is intentional, prefix it with an underscore: `_t`
   |
   = note: `-D unused-variables` implied by `-D warnings`
-
-error: could not compile `cargo-bot-functions` (lib) due to previous error
-error: could not compile `cargo-bot-functions` (lib) due to previous error
 
 ✔ Phone a friend? 📞🤖 · yes
 ⠙ 🤖 thinking ... (gpt-3.5-turbo-0613)

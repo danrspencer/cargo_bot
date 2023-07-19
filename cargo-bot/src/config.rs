@@ -1,8 +1,11 @@
-use std::{fs::File, io::Read, path::Path};
+use serde::{Deserialize, Serialize};
+use std::{
+    fs::File,
+    io::{Read, Write},
+    path::Path,
+};
 
-use serde::Deserialize;
-
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Config {
     pub api_key: String,
 }
@@ -15,11 +18,29 @@ impl Config {
             .join(".cargo")
             .join("cargo-bot-config.toml");
 
-        let mut file = File::open(config_path).expect("Could not open file");
-        let mut contents = String::new();
-        file.read_to_string(&mut contents)
-            .expect("Could not read file");
+        let file = File::open(config_path.clone());
 
-        toml::from_str(&contents).unwrap()
+        match file {
+            Ok(mut file) => {
+                let mut contents = String::new();
+                file.read_to_string(&mut contents)
+                    .expect("Could not read file");
+                toml::from_str(&contents).unwrap()
+            }
+            Err(_) => {
+                let api_key = dialoguer::Input::<String>::new()
+                    .with_prompt("Enter your API key")
+                    .interact_text()
+                    .unwrap();
+
+                let config = Config { api_key };
+
+                let mut file = File::create(config_path).unwrap();
+                file.write_all(toml::to_string(&config).unwrap().as_bytes())
+                    .unwrap();
+
+                config
+            }
+        }
     }
 }
