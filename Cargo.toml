@@ -4,6 +4,7 @@ resolver = "2"
 members = ["cargo-bot", "cargo-bot-functions"]
 
 [workspace.dependencies]
+clap = "4.3"
 chrono = { version = "0.4", features = ["serde"] }
 colored = "2.0"
 difference = "2.0"

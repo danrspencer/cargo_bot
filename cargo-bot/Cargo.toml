@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 cargo-bot-functions = { path = "../cargo-bot-functions" }
 
+clap.workspace = true
 chrono.workspace = true
 colored.workspace = true
 dialoguer.workspace = true

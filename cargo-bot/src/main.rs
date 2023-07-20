@@ -1,3 +1,4 @@
+use clap::{Arg, Command};
 use config::Config;
 use dialoguer::{theme::ColorfulTheme, Confirm};
 use indicatif::ProgressBar;
@@ -14,7 +15,25 @@ mod model;
 async fn main() {
     let config = Config::init();
 
-    for cmd in &[cargo::check, cargo::build, cargo::clippy] {
+    let cmd = Command::new("cargo")
+        .bin_name("cargo")
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .disable_help_subcommand(true)
+        .subcommand_required(true)
+        .subcommand(
+            Command::new("bot").arg(
+                Arg::new("cmd:cargo")
+                    .short('x')
+                    .long("exec")
+                    .value_name("cmd")
+                    .number_of_values(1)
+                    .help("Cargo command(s) to execute on changes [default: clippy]"),
+            ),
+        );
+    let matches = cmd.get_matches();
+
+    for cmd in &[cargo::clippy] {
         let (cmd_str, result) = cmd();
 
         let output = match result {
