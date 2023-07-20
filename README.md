@@ -1,4 +1,4 @@
-# Cargo Exo
+# Cargo Exo  
 
 *Strap in and say 'Express elevator to hell, going down!' to your coding challenges. Squash bugs and streamline your cargo like a pro. [^1]*
 <p align="center">
@@ -6,6 +6,8 @@
 </p>
 
 ---
+
+![Rust Workflow](https://github.com/danrspencer/cargo_exo/actions/workflows/rust.yml/badge.svg)
 
 Cargo Exo is a plugin for the Rust ecosystem that enhances your Rust development experience. It utilizes the output of other Rust commands to suggest changes and improve your codebase. 
 
