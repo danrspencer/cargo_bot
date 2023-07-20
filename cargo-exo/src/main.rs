@@ -24,11 +24,11 @@ async fn main() {
         .disable_help_subcommand(true)
         .subcommand_required(true)
         .subcommand(
-            Command::new("bot").arg(
-                Arg::new("cmd:cargo")
+            Command::new("exo").arg(
+                Arg::new("arg:exec")
                     .short('x')
                     .long("exec")
-                    .value_name("cmd")
+                    .value_name("command")
                     .number_of_values(1)
                     .help("Cargo command(s) to execute on changes [default: clippy]"),
             ),
@@ -36,11 +36,13 @@ async fn main() {
     let matches = cmd.get_matches();
     // todo - maybe we want to let people specify multiple commands?
     let args = Args::new(matches);
-    let cmds = vec![(format!("cargo {}", args.cmd.join(" ")), || {
-        cargo::command(&args.cmd)
+    let cmds = vec![(format!("cargo {}", args.cmd), || {
+        cargo::command(&args.get_cmd_vec())
     })];
 
     for (cmd_str, cmd) in cmds {
+        println!("🤖 {}", cmd_str);
+
         let result = cmd();
 
         let output = match result {
