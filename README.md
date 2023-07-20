@@ -1,8 +1,9 @@
 # Cargo Exo
 
-![Loader Image](./resources/images/loader.jpeg)
-
-Cargo Exo: Strap in and say 'Express elevator to hell, going down!' to your coding challenges. Squash bugs and streamline your cargo like a pro. [^1]
+*Strap in and say 'Express elevator to hell, going down!' to your coding challenges. Squash bugs and streamline your cargo like a pro. [^1]*
+<p align="center">
+ <img src="./resources/images/loader.jpeg" style="width: 40%; height: auto;">
+</p>
 
 ---
 
