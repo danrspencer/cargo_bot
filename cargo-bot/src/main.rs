@@ -1,3 +1,4 @@
+use crate::args::Args;
 use clap::{Arg, Command};
 use config::Config;
 use dialoguer::{theme::ColorfulTheme, Confirm};
@@ -7,6 +8,7 @@ use std::time::Duration;
 use tokio::select;
 
 mod api;
+mod args;
 mod cargo;
 mod config;
 mod model;
@@ -31,10 +33,15 @@ async fn main() {
                     .help("Cargo command(s) to execute on changes [default: clippy]"),
             ),
         );
-    let matches = cmd.get_matches();
+    let _matches = cmd.get_matches();
+    // todo - maybe we want to let people specify multiple commands?
+    let args = Args::default();
+    let cmds = vec![(format!("cargo {}", args.cmd.join(" ")), || {
+        cargo::command(&args.cmd)
+    })];
 
-    for cmd in &[cargo::clippy] {
-        let (cmd_str, result) = cmd();
+    for (cmd_str, cmd) in &cmds {
+        let result = cmd();
 
         let output = match result {
             Ok(()) => {

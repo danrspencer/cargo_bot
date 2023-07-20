@@ -26,7 +26,7 @@ pub fn fmt() -> (String, Result<(), String>) {
     (format!("cargo {}", args.join(" ")), command(&args))
 }
 
-fn command(args: &[&str]) -> Result<(), String> {
+pub fn command<T: AsRef<str>>(args: &[T]) -> Result<(), String> {
     let current_dir = env::current_dir().expect("failed to get current directory");
 
     let mut child = Command::new("cargo")
