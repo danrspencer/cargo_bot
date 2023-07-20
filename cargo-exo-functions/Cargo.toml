@@ -1,5 +1,5 @@
 [package]
-name = "cargo-bot-functions"
+name = "cargo-exo-functions"
 version = "0.1.0"
 edition = "2021"
 

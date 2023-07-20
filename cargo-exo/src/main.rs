@@ -87,10 +87,10 @@ async fn main() {
 
         match &result.choices[0].message.function_call {
             Some(model::response::FunctionCall::UpdateFile(args)) => {
-                cargo_bot_functions::update_files::update_files(args);
+                cargo_exo_functions::update_files::update_files(args);
             }
             Some(model::response::FunctionCall::Explain(args)) => {
-                cargo_bot_functions::explain::explain(args);
+                cargo_exo_functions::explain::explain(args);
             }
             None => {
                 println!("🤖 no changes to make!");

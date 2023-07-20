@@ -1,4 +1,4 @@
-use cargo_bot_functions::{explain::ExplainParams, update_files::UpdateFilesParams};
+use cargo_exo_functions::{explain::ExplainParams, update_files::UpdateFilesParams};
 use serde::{de::DeserializeOwned, Deserialize, Deserializer, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -53,7 +53,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use cargo_bot_functions::update_files::{FileUpdate, LineAction, LineUpdate};
+    use cargo_exo_functions::update_files::{FileUpdate, LineAction, LineUpdate};
     use serde_json::json;
 
     use super::*;

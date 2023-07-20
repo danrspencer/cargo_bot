@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 
-members = ["cargo-bot", "cargo-bot-functions"]
+members = ["cargo-exo", "cargo-exo-functions"]
 
 [workspace.dependencies]
 clap = "4.3"

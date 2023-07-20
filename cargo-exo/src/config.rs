@@ -16,7 +16,7 @@ impl Config {
 
         let config_path = Path::new(&home_dir)
             .join(".cargo")
-            .join("cargo-bot-config.toml");
+            .join("cargo-exo-config.toml");
 
         let file = File::open(config_path.clone());
 

@@ -1,5 +1,5 @@
-use cargo_bot_functions::explain::ExplainParams;
-use cargo_bot_functions::update_files::UpdateFilesParams;
+use cargo_exo_functions::explain::ExplainParams;
+use cargo_exo_functions::update_files::UpdateFilesParams;
 use schemars::gen::SchemaGenerator;
 use serde_json::json;
 use std::env;

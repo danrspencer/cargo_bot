@@ -33,7 +33,7 @@ pub async fn send_request<T: Serialize>(
 
     if DEBUG {
         let timestamp = chrono::Local::now().format("%Y%m%d%H%M%S");
-        let path = "/tmp/cargo_bot_debug";
+        let path = "/tmp/cargo_exo_debug";
         let filepath = format!("{}/{}.json", path, timestamp);
 
         println!("🤖 saving debug output to {}", filepath);
