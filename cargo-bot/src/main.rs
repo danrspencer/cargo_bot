@@ -33,14 +33,14 @@ async fn main() {
                     .help("Cargo command(s) to execute on changes [default: clippy]"),
             ),
         );
-    let _matches = cmd.get_matches();
+    let matches = cmd.get_matches();
     // todo - maybe we want to let people specify multiple commands?
-    let args = Args::default();
+    let args = Args::new(matches);
     let cmds = vec![(format!("cargo {}", args.cmd.join(" ")), || {
         cargo::command(&args.cmd)
     })];
 
-    for (cmd_str, cmd) in &cmds {
+    for (cmd_str, cmd) in cmds {
         let result = cmd();
 
         let output = match result {

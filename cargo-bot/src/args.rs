@@ -1,9 +1,11 @@
-struct Args {
+use clap::ArgMatches;
+
+pub struct Args {
     pub cmd: Vec<String>,
 }
 
-impl Default for Args {
-    fn default() -> Self {
+impl Args {
+    pub fn new(_args: ArgMatches) -> Self {
         Self {
             cmd: vec![
                 "clippy".to_string(),

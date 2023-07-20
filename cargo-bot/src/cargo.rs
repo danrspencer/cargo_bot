@@ -3,30 +3,12 @@ use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 use std::thread;
 
-pub fn build() -> (String, Result<(), String>) {
-    println!("🤖 cargo build");
-    let args = ["build", "-q", "--color=always"];
-    (format!("cargo {}", args.join(" ")), command(&args))
-}
-
-pub fn check() -> (String, Result<(), String>) {
-    println!("🤖 cargo check");
-    let args = ["check", "-q", "--color=always"];
-    (format!("cargo {}", args.join(" ")), command(&args))
-}
-
-pub fn clippy() -> (String, Result<(), String>) {
-    println!("🤖 cargo clippy -- -D warnings");
-    let args = ["clippy", "-q", "--color=always", "--", "-D", "warnings"];
-    (format!("cargo {}", args.join(" ")), command(&args))
-}
-
 pub fn fmt() -> (String, Result<(), String>) {
     let args = ["fmt"];
     (format!("cargo {}", args.join(" ")), command(&args))
 }
 
-pub fn command<T: AsRef<str>>(args: &[T]) -> Result<(), String> {
+pub fn command<T: AsRef<str> + AsRef<std::ffi::OsStr>>(args: &[T]) -> Result<(), String> {
     let current_dir = env::current_dir().expect("failed to get current directory");
 
     let mut child = Command::new("cargo")
