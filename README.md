@@ -36,7 +36,7 @@ $ cargo install --git http://github.com/danrspencer/cargo_exo
 You can use Cargo Exo alongside standard cargo commands like so:
 
 ```bash
-$ cargo exo clippy -- -D warnings
+$ cargo exo -x "clippy -- -D warnings"
 ```
 
 This command runs `cargo clippy` with the `-D warnings` flag, then processes any warnings or errors using Cargo Exo. If there are any fixable issues, Cargo Exo will present the suggested changes in a diff format, and ask if you'd like to apply the changes.
