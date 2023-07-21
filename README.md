@@ -44,7 +44,7 @@ This command runs `cargo clippy` with the `-D warnings` flag, then processes any
 Example output:
 
 ```bash
-🤖 cargo exo clippy -- -D warnings
+🤖 cargo clippy -- -D warnings
 error: unused variable: `t`
  --> cargo-exo-functions/src/explain/mod.rs:7:13
   |
