@@ -1,4 +1,5 @@
 use crate::args::Args;
+use cargo::CargoCommand;
 use clap::{Arg, Command};
 use config::Config;
 use dialoguer::{theme::ColorfulTheme, Confirm};
@@ -37,7 +38,7 @@ async fn main() {
     // todo - maybe we want to let people specify multiple commands?
     let args = Args::new(matches);
     let cmds = vec![(format!("cargo {}", args.cmd), || {
-        cargo::command(&args.get_cmd_vec())
+        CargoCommand::run(&args.get_cmd_vec())
     })];
 
     for (cmd_str, cmd) in cmds {
@@ -45,11 +46,10 @@ async fn main() {
 
         let result = cmd();
 
-        let output = match result {
-            Ok(()) => {
-                continue;
-            }
-            Err(output) => output,
+        let output = if result.is_ok() {
+            continue;
+        } else {
+            result.stderr
         };
 
         println!();
@@ -102,5 +102,5 @@ async fn main() {
         break;
     }
 
-    let _ = cargo::fmt();
+    let _ = CargoCommand::fmt();
 }
