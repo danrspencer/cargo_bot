@@ -1,4 +1,4 @@
-# Cargo Exo  
+# Cargo Exo (Alpha)
 
 *Strap in and say 'Express elevator to hell, going down!' to your coding challenges. Squash bugs and streamline your cargo like a pro. [^1]*
 <p align="center">
