@@ -1,11 +1,14 @@
-use crate::args::Args;
-use cargo::CargoCommand;
+use crate::{args::Args, cargo::CargoCommand};
+use cargo::CargoCommandResult;
+use chrono::serde;
 use clap::{Arg, Command};
 use config::Config;
+use core::panic;
 use dialoguer::{theme::ColorfulTheme, Confirm};
 use indicatif::ProgressBar;
 use model::request::Request;
-use std::time::Duration;
+use serde_json::Value;
+use std::{collections::HashSet, time::Duration};
 use tokio::select;
 
 mod api;
@@ -18,39 +21,67 @@ mod model;
 async fn main() {
     let config = Config::init();
 
-    let cmd = Command::new("cargo")
-        .bin_name("cargo")
-        .version(env!("CARGO_PKG_VERSION"))
-        .author(env!("CARGO_PKG_AUTHORS"))
-        .disable_help_subcommand(true)
-        .subcommand_required(true)
-        .subcommand(
-            Command::new("exo").arg(
-                Arg::new("arg:exec")
-                    .short('x')
-                    .long("exec")
-                    .value_name("command")
-                    .number_of_values(1)
-                    .help("Cargo command(s) to execute on changes [default: clippy]"),
-            ),
-        );
-    let matches = cmd.get_matches();
-    // todo - maybe we want to let people specify multiple commands?
-    let args = Args::new(matches);
-    let cmds = vec![(format!("cargo {}", args.cmd), || {
-        CargoCommand::run(&args.get_cmd_vec())
-    })];
+    // let cmd = Command::new("cargo")
+    //     .bin_name("cargo")
+    //     .version(env!("CARGO_PKG_VERSION"))
+    //     .author(env!("CARGO_PKG_AUTHORS"))
+    //     .disable_help_subcommand(true)
+    //     .subcommand_required(true)
+    //     .subcommand(
+    //         Command::new("exo").arg(
+    //             Arg::new("arg:exec")
+    //                 .short('x')
+    //                 .long("exec")
+    //                 .value_name("command")
+    //                 .number_of_values(1)
+    //                 .help("Cargo command(s) to execute on changes [default: clippy]"),
+    //         ),
+    //     );
+    // let matches = cmd.get_matches();
+    // // todo - maybe we want to let people specify multiple commands?
+    // let args = Args::new(matches);
 
-    for (cmd_str, cmd) in cmds {
-        println!("🤖 {}", cmd_str);
+    let args = Args {
+        cmd: "clippy -- -D warnings".to_string(),
+    };
+    let cmds = vec![args.cmd];
 
-        let result = cmd();
+    for cmd in cmds {
+        println!("🤖 {}", cmd);
 
-        let output = if result.is_ok() {
+        let result = CargoCommand::new(&cmd).quiet().color_always().run_silent();
+
+        let output = if result.was_success() {
             continue;
         } else {
             result.stderr
         };
+
+        let json_result = CargoCommand::new(&cmd).message_format_json().run_silent();
+
+        println!("---------");
+        let suggestions = json_result
+            .stdout
+            .split('\n')
+            .filter_map(|line| serde_json::from_str::<Value>(line).ok())
+            .filter_map(|value| value.get("message").cloned())
+            .filter_map(|message| {
+                let msg_str = message.to_string();
+                rustfix::get_suggestions_from_json(
+                    &msg_str,
+                    &HashSet::new(),
+                    rustfix::Filter::Everything,
+                )
+                .ok()
+            })
+            .flatten()
+            .collect::<Vec<_>>();
+
+        println!("🤖 {} suggestions", suggestions.len());
+
+        for suggestion in suggestions {
+            println!("🤖 {:?}", suggestion);
+        }
 
         println!();
         if !Confirm::with_theme(&ColorfulTheme::default())
@@ -62,7 +93,7 @@ async fn main() {
             break;
         }
 
-        let request = Request::new(cmd_str, output);
+        let request = Request::new(cmd, output);
         let mut request_fut = Box::pin(api::send_request(&request, config.api_key.clone()));
 
         let spinner = ProgressBar::new_spinner();
@@ -102,5 +133,5 @@ async fn main() {
         break;
     }
 
-    let _ = CargoCommand::fmt();
+    // let _ = CargoCommandResult::fmt();
 }

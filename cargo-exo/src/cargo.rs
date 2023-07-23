@@ -1,20 +1,52 @@
+use std::env;
+use std::fmt::{Display, Formatter};
+use std::io;
+use std::io::Read;
 use std::io::{BufRead, BufReader};
 use std::process::{Command, ExitStatus, Stdio};
 use std::thread;
-use std::{env, io};
 
 pub struct CargoCommand {
-    pub stdout: String,
-    pub stderr: String,
-    pub result: io::Result<ExitStatus>,
+    args: Vec<String>,
+}
+
+impl Display for CargoCommand {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "cargo {}", self.args.join(" "))
+    }
 }
 
 impl CargoCommand {
-    pub fn run<T: AsRef<str> + AsRef<std::ffi::OsStr>>(args: &[T]) -> Self {
+    pub fn new(command: &str) -> Self {
+        Self {
+            args: command
+                .split(' ')
+                .into_iter()
+                .map(String::from)
+                .collect::<Vec<_>>(),
+        }
+    }
+
+    pub fn quiet(mut self) -> Self {
+        self.args.insert(1, "--quiet".to_string());
+        self
+    }
+
+    pub fn color_always(mut self) -> Self {
+        self.args.insert(1, "--color=always".to_string());
+        self
+    }
+
+    pub fn message_format_json(mut self) -> Self {
+        self.args.insert(1, "--message-format=json".to_string());
+        self
+    }
+
+    pub fn run(&self) -> CargoCommandResult {
         let current_dir = env::current_dir().expect("failed to get current directory");
 
         let mut child = Command::new("cargo")
-            .args(args)
+            .args(&self.args)
             .current_dir(current_dir)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -62,19 +94,55 @@ impl CargoCommand {
         let stdout_stripped = strip_ansi_escapes::strip(stdout_output).unwrap();
         let stderr_stripped = strip_ansi_escapes::strip(stderr_output).unwrap();
 
-        Self {
+        CargoCommandResult {
             stdout: String::from_utf8(stdout_stripped).unwrap(),
             stderr: String::from_utf8(stderr_stripped).unwrap(),
             result,
         }
     }
 
-    pub fn fmt() -> Self {
-        let args = ["fmt"];
-        Self::run(&args)
-    }
+    pub fn run_silent(&self) -> CargoCommandResult {
+        let current_dir = env::current_dir().expect("failed to get current directory");
 
-    pub fn is_ok(&self) -> bool {
-        self.result.is_ok()
+        let mut child = Command::new("cargo")
+            .args(&self.args)
+            .current_dir(current_dir)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .expect("failed to execute process");
+
+        let mut stdout = child.stdout.take().unwrap();
+        let mut stderr = child.stderr.take().unwrap();
+
+        let mut stdout_output = String::new();
+        let mut stderr_output = String::new();
+
+        stdout.read_to_string(&mut stdout_output).unwrap();
+        stderr.read_to_string(&mut stderr_output).unwrap();
+
+        let result = child.wait();
+
+        CargoCommandResult {
+            stdout: stdout_output,
+            stderr: stderr_output,
+            result,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct CargoCommandResult {
+    pub stdout: String,
+    pub stderr: String,
+    pub result: io::Result<ExitStatus>,
+}
+
+impl CargoCommandResult {
+    pub fn was_success(&self) -> bool {
+        match self.result {
+            Ok(status) => status.success(),
+            Err(_) => false,
+        }
     }
 }
