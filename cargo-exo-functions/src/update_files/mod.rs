@@ -13,6 +13,14 @@ mod cli;
 mod params;
 
 pub fn update_files_2(suggestions: Vec<Suggestion>) {
+    // write the suggestions to as json for debug in tmp
+    let mut file = OpenOptions::new();
+    file.write(true);
+    file.create(true);
+    let mut file = file.open("/tmp/suggestions.json").unwrap();
+    let suggestions = serde_json::to_string_pretty(&suggestions).unwrap();
+    file.write_all(suggestions.as_bytes()).unwrap();
+
     let mut files = HashMap::new();
     for suggestion in suggestions {
         let file = suggestion.solutions[0].replacements[0]
