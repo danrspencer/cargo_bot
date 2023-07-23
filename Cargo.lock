@@ -188,6 +188,7 @@ dependencies = [
  "once_cell",
  "regex",
  "reqwest",
+ "rustfix",
  "schemars",
  "serde",
  "serde_json",

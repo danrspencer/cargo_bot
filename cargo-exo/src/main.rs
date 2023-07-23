@@ -1,5 +1,6 @@
 use crate::{args::Args, cargo::CargoCommand};
 use cargo::CargoCommandResult;
+use cargo_exo_functions::update_files::update_files_2;
 use chrono::serde;
 use clap::{Arg, Command};
 use config::Config;
@@ -7,6 +8,7 @@ use core::panic;
 use dialoguer::{theme::ColorfulTheme, Confirm};
 use indicatif::ProgressBar;
 use model::request::Request;
+use rustfix::CodeFix;
 use serde_json::Value;
 use std::{collections::HashSet, time::Duration};
 use tokio::select;
@@ -79,9 +81,9 @@ async fn main() {
 
         println!("🤖 {} suggestions", suggestions.len());
 
-        for suggestion in suggestions {
-            println!("🤖 {:?}", suggestion);
-        }
+        update_files_2(suggestions);
+
+        panic!();
 
         println!();
         if !Confirm::with_theme(&ColorfulTheme::default())

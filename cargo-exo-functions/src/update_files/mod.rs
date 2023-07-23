@@ -1,13 +1,63 @@
+use rustfix::Suggestion;
+
 use self::cli::{Cli, UserCli};
 pub use self::params::*;
 use std::{
-    fs::OpenOptions,
+    collections::HashMap,
+    fs::{self, OpenOptions},
     io::{BufRead, BufReader, Write},
     path::Path,
 };
 
 mod cli;
 mod params;
+
+pub fn update_files_2(suggestions: Vec<Suggestion>) {
+    let mut files = HashMap::new();
+    for suggestion in suggestions {
+        let file = suggestion.solutions[0].replacements[0]
+            .snippet
+            .file_name
+            .clone();
+        files.entry(file).or_insert_with(Vec::new).push(suggestion);
+    }
+
+    for (source_file, suggestions) in &files {
+        let source = fs::read_to_string(source_file).unwrap();
+        let mut fix = rustfix::CodeFix::new(&source);
+
+        for suggestion in suggestions.iter().rev() {
+            let line_update = suggestion.clone().into();
+            if !UserCli::confirm_update(
+                &source_file,
+                &line_update,
+                &source.split('\n').map(String::from).collect::<Vec<_>>(),
+            ) {
+                continue;
+            }
+
+            if let Err(e) = fix.apply(suggestion) {
+                eprintln!("Failed to apply suggestion to {}: {}", source_file, e);
+            }
+        }
+        let fixes = fix.finish().unwrap();
+
+        println!("{}", fixes);
+    }
+}
+
+impl From<Suggestion> for LineUpdate {
+    fn from(value: Suggestion) -> Self {
+        let snippet = value.snippets[0].clone();
+        let replacement = value.solutions[0].replacements[0].replacement.clone();
+
+        Self {
+            line_no: snippet.line_range.start.line as i32,
+            action: LineAction::Replace,
+            content: Some(replacement),
+        }
+    }
+}
 
 pub fn update_files(args: &UpdateFilesParams) {
     for file_update in &args.files {
