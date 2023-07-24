@@ -23,7 +23,7 @@ impl CargoCommand {
         }
     }
 
-    pub fn quiet(mut self) -> Self {
+    pub fn _quiet(mut self) -> Self {
         self.args.insert(1, "--quiet".to_string());
         self
     }

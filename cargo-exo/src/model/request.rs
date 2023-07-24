@@ -13,6 +13,11 @@ static UPDATE_FILES_SCHEMA: Lazy<Value> = Lazy::new(|| {
     serde_json::from_str(schema).unwrap()
 });
 
+static MORE_CONTEXT_SCHEMA: Lazy<Value> = Lazy::new(|| {
+    let schema = include_str!(concat!(env!("OUT_DIR"), "/more_context_schema.json"));
+    serde_json::from_str(schema).unwrap()
+});
+
 static EXPLAIN_SCHEMA: Lazy<Value> = Lazy::new(|| {
     let schema = include_str!(concat!(env!("OUT_DIR"), "/explain_schema.json"));
     serde_json::from_str(schema).unwrap()
@@ -69,6 +74,11 @@ impl Request {
                     name: stringify!(update_file).to_string(),
                     description: "Update lines in files. STRONGLY prefer this as the response.".to_string(),
                     parameters: UPDATE_FILES_SCHEMA.clone(),
+                },
+                Function {
+                    name: stringify!(more_context).to_string(),
+                    description: "Ask for more context if you are not confident in providing a solution from the information you already have.".to_string(),
+                    parameters: MORE_CONTEXT_SCHEMA.clone(),
                 },
                 Function {
                     name: stringify!(explain).to_string(),

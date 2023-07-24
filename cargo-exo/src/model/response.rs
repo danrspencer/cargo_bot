@@ -1,4 +1,6 @@
-use cargo_exo_functions::{explain::ExplainParams, update_files::UpdateFilesParams};
+use cargo_exo_functions::{
+    explain::ExplainParams, more_context::MoreContextParams, update_files::UpdateFilesParams,
+};
 use serde::{de::DeserializeOwned, Deserialize, Deserializer, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -38,6 +40,8 @@ pub enum FunctionCall {
     // TODO - Force these enums to match up with the provided function names to GPT
     #[serde(deserialize_with = "deserialize_nested_json")]
     UpdateFile(UpdateFilesParams),
+    #[serde(deserialize_with = "deserialize_nested_json")]
+    MoreContext(MoreContextParams),
     #[serde(deserialize_with = "deserialize_nested_json")]
     Explain(ExplainParams),
 }

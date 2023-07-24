@@ -1,4 +1,5 @@
 use cargo_exo_functions::explain::ExplainParams;
+use cargo_exo_functions::more_context::MoreContextParams;
 use cargo_exo_functions::update_files::UpdateFilesParams;
 use schemars::gen::SchemaGenerator;
 use serde_json::json;
@@ -16,6 +17,11 @@ fn main() {
             "update_files_schema.json",
             SchemaGenerator::new(schema_settings.clone())
                 .into_root_schema_for::<UpdateFilesParams>(),
+        ),
+        (
+            "more_context_schema.json",
+            SchemaGenerator::new(schema_settings.clone())
+                .into_root_schema_for::<MoreContextParams>(),
         ),
         (
             "explain_schema.json",

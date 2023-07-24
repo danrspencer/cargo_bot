@@ -150,12 +150,13 @@ async fn main() {
         };
 
         match &result.choices[0].message.function_call {
-            Some(model::response::FunctionCall::UpdateFile(args)) => {
-                cargo_exo_functions::update_files::update_files(args, &project_root);
+            Some(model::response::FunctionCall::UpdateFile(params)) => {
+                cargo_exo_functions::update_files::update_files(params, &project_root);
             }
-            Some(model::response::FunctionCall::Explain(args)) => {
-                cargo_exo_functions::explain::explain(args);
+            Some(model::response::FunctionCall::Explain(params)) => {
+                cargo_exo_functions::explain::explain(params);
             }
+            Some(model::response::FunctionCall::MoreContext(params)) => println!("{:?}", params),
             None => {
                 println!("🤖 no changes to make!");
             }
