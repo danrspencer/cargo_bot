@@ -23,7 +23,7 @@ pub fn update_files_2(suggestions: Vec<Suggestion>) {
     }
 
     for (source_file, suggestions) in &files {
-        let mut source = fs::read_to_string(source_file).unwrap();
+        let mut source = fs::read_to_string(source_file).expect(&source_file);
         let mut change_counter = 0;
 
         for suggestion in suggestions.iter().rev() {

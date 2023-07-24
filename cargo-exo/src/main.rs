@@ -27,7 +27,7 @@ async fn main() {
     let config = Config::init();
 
     let args: Vec<String> = env::args().collect();
-    let was_cargo_run = args[0] == "target/debug/cargo-exo";
+    let was_cargo_run = args[0].contains("target/debug/cargo-exo");
 
     let cmd = Command::new("cargo")
         .bin_name("cargo")
@@ -48,6 +48,7 @@ async fn main() {
         );
 
     let matches = cmd.get_matches();
+    let sdfdsf = "tree";
 
     // If we can't get the subcommand we're doing cargo run so should just use default args
     let args = matches.subcommand_matches("exo").map_or_else(
@@ -62,10 +63,15 @@ async fn main() {
     for cmd in cmds {
         println!("🤖 {}", cmd);
 
+        let result = CargoCommand::new(&cmd)
+            .quiet()
+            .color_always()
+            .run(false, true);
+
         let json_result = CargoCommand::new(&cmd)
             .color_always()
             .message_format_json()
-            .run(false, true);
+            .run(false, false);
 
         let messages = json_result
             .stdout
@@ -88,17 +94,10 @@ async fn main() {
             .flatten()
             .collect::<Vec<_>>();
 
-        println!("🤖 {} suggestions", suggestions.len());
-
         if !suggestions.is_empty() {
             update_files_2(suggestions);
             continue;
         }
-
-        let result = CargoCommand::new(&cmd)
-            .quiet()
-            .color_always()
-            .run(false, false);
 
         let output = if result.was_success() {
             continue;
