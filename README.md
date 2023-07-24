@@ -1,6 +1,6 @@
 # Cargo Exo (Alpha)
 
-*Strap in and say 'Express elevator to hell, going down!' to your coding challenges. Squash bugs and streamline your cargo like a pro. [^1]*
+*Strap in and say 'Express elevator to hell, going down!' to your coding challenges. Squash bugs and streamline your cargo like a pro with the new feature of automated error fixing[^1]*
 <p align="center">
  <img src="./resources/images/loader.jpeg" style="width: 40%; height: auto;">
 </p>
@@ -9,7 +9,7 @@
 
 ![Rust Workflow](https://github.com/danrspencer/cargo_exo/actions/workflows/rust.yml/badge.svg)
 
-Cargo Exo is a plugin for the Rust ecosystem that enhances your Rust development experience. It utilizes the output of other Rust commands to suggest changes and improve your codebase. 
+Cargo Exo is a Rust ecosystem plugin that enhances your development experience. It uses RustFix to attempt automatic fixes for any errors it encounters. In case of build failures with no automatic fixes available, it utilizes ChatGPT to suggest solutions, thus making your codebase more efficient and bug-free.
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -19,13 +19,13 @@ Cargo Exo is a plugin for the Rust ecosystem that enhances your Rust development
 - [License](#license)
 
 ## Introduction
-Cargo Exo uses the power of GPT from OpenAI to process the warnings and errors from your Rust code, generating intelligent, context-aware suggestions to fix them. With interactive confirmation prompts, you have complete control over which changes to apply.
+Cargo Exo combines the power of GPT from OpenAI and RustFix to process the warnings and errors from your Rust code, generating intelligent, context-aware suggestions for automatic fixes or manual modifications. With interactive confirmation prompts, you retain full control over the applied changes.
 
 ## Installation
 
-To install Cargo Exo, you need to have Rust installed on your machine. If you haven't installed Rust, please follow the instructions on the official [Rust website](https://www.rust-lang.org/tools/install).
+To install Cargo Exo, you need Rust on your machine. If Rust isn't installed yet, follow the instructions on the official [Rust website](https://www.rust-lang.org/tools/install).
 
-With Rust and cargo installed, you can install the Cargo Exo plugin using the following command:
+With Rust and cargo installed, install the Cargo Exo plugin using the command:
 
 ```bash
 $ cargo install --git http://github.com/danrspencer/cargo_exo
@@ -33,13 +33,13 @@ $ cargo install --git http://github.com/danrspencer/cargo_exo
 
 ## Usage
 
-You can use Cargo Exo alongside standard cargo commands like so:
+Use Cargo Exo alongside standard cargo commands like this:
 
 ```bash
 $ cargo exo -x "clippy -- -D warnings"
 ```
 
-This command runs `cargo clippy` with the `-D warnings` flag, then processes any warnings or errors using Cargo Exo. If there are any fixable issues, Cargo Exo will present the suggested changes in a diff format, and ask if you'd like to apply the changes.
+This command runs `cargo clippy` with the `-D warnings` flag, and any warnings or errors are processed by Cargo Exo. If there are fixable issues, Cargo Exo displays the suggested changes in a diff format, asking if you'd like to apply them.
 
 Example output:
 
@@ -64,15 +64,15 @@ error: unused variable
 ✔ Do you want to apply these changes? · yes
 ```
 
-As shown, Cargo Exo takes the unused variable warning, suggests a fix and asks for your confirmation to apply the changes.
+As depicted, Cargo Exo takes the unused variable warning, suggests a fix, and asks for your approval to apply changes.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are most welcome! Feel free to submit a Pull Request.
 
 ## License
 
-Cargo Exo is licensed under MIT. For more information, see the [LICENSE](LICENSE) file.
+Cargo Exo is under MIT license. For further information, refer to the [LICENSE](LICENSE) file.
 
 [^1]: This tagline is AI-generated and may or may not fully capture the experience of using an exosuit to handle cargo and squash bugs in your Rust code. Your actual results may be less dramatic, but hopefully still effective![^2]
 
