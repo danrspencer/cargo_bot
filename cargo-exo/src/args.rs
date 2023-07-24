@@ -1,13 +1,13 @@
 use clap::ArgMatches;
 
-const ARG_EXEC: &str = "arg:exec";
+pub const ARG_EXEC: &str = "arg:exec";
 
 pub struct Args {
     pub cmd: String,
 }
 
 impl Args {
-    pub fn new(args: ArgMatches) -> Self {
+    pub fn new(args: &ArgMatches) -> Self {
         let cmd = args
             .get_one::<String>(ARG_EXEC)
             .cloned()

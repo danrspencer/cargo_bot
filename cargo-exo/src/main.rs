@@ -1,10 +1,14 @@
+use crate::args::ARG_EXEC;
 use crate::model::request::GPT_3_5;
 use crate::model::request::GPT_4;
 use crate::{args::Args, cargo::CargoCommand};
 use cargo_exo_functions::update_files::update_files_2;
+use clap::Arg;
+use clap::Command;
 use config::Config;
 use core::panic;
 use dialoguer::Select;
+use std::env;
 
 use indicatif::ProgressBar;
 use model::request::Request;
@@ -22,29 +26,37 @@ mod model;
 async fn main() {
     let config = Config::init();
 
-    // let cmd = Command::new("cargo")
-    //     .bin_name("cargo")
-    //     .version(env!("CARGO_PKG_VERSION"))
-    //     .author(env!("CARGO_PKG_AUTHORS"))
-    //     .disable_help_subcommand(true)
-    //     .subcommand_required(true)
-    //     .subcommand(
-    //         Command::new("exo").arg(
-    //             Arg::new("arg:exec")
-    //                 .short('x')
-    //                 .long("exec")
-    //                 .value_name("command")
-    //                 .number_of_values(1)
-    //                 .help("Cargo command(s) to execute on changes [default: clippy]"),
-    //         ),
-    //     );
-    // let matches = cmd.get_matches();
-    // // todo - maybe we want to let people specify multiple commands?
-    // let args = Args::new(matches);
+    let args: Vec<String> = env::args().collect();
+    let was_cargo_run = args[0] == "target/debug/cargo-exo";
 
-    let args = Args {
-        cmd: "clippy -- -D warnings".to_string(),
-    };
+    let cmd = Command::new("cargo")
+        .bin_name("cargo")
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .disable_help_subcommand(true)
+        .subcommand_required(!was_cargo_run)
+        .subcommand(
+            Command::new("exo").arg(
+                Arg::new(ARG_EXEC)
+                    .short('x')
+                    .long("exec")
+                    .value_name("command")
+                    // todo - maybe we want to let people specify multiple commands?
+                    .number_of_values(1)
+                    .help("Cargo command(s) to execute on changes [default: clippy]"),
+            ),
+        );
+
+    let matches = cmd.get_matches();
+
+    // If we can't get the subcommand we're doing cargo run so should just use default args
+    let args = matches.subcommand_matches("exo").map_or_else(
+        || Args {
+            cmd: "clippy -- -D warnings".to_string(),
+        },
+        Args::new,
+    );
+
     let cmds = vec![args.cmd];
 
     for cmd in cmds {
@@ -58,19 +70,14 @@ async fn main() {
         let messages = json_result
             .stdout
             .split('\n')
-            .filter_map(|s| match serde_json::from_str::<Value>(s) {
-                Ok(v) => Some(v),
-                Err(e) => {
-                    println!("🤖 couldn't serialize: {:?}", e);
-                    None
-                }
-            })
+            .filter_map(|s| serde_json::from_str::<Value>(s).ok())
             .filter_map(|value| value.get("message").cloned());
 
         println!("---------");
         let suggestions = messages
             .filter_map(|message| {
                 let msg_str = message.to_string();
+                // TODO - can we update this to just parse the Value directly?
                 rustfix::get_suggestions_from_json(
                     &msg_str,
                     &HashSet::new(),
