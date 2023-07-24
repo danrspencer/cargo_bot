@@ -6,7 +6,7 @@ use std::{
     collections::HashMap,
     fs::{self, OpenOptions},
     io::{BufRead, BufReader, Write},
-    path::{Path},
+    path::Path,
 };
 
 mod cli;

@@ -19,10 +19,7 @@ impl Display for CargoCommand {
 impl CargoCommand {
     pub fn new(command: &str) -> Self {
         Self {
-            args: command
-                .split(' ')
-                .map(String::from)
-                .collect::<Vec<_>>(),
+            args: command.split(' ').map(String::from).collect::<Vec<_>>(),
         }
     }
 
