@@ -1,5 +1,6 @@
 use self::cli::{Cli, UserCli};
 pub use self::params::*;
+use colored::Colorize;
 use rustfix::Suggestion;
 use std::{
     collections::HashMap,
@@ -23,9 +24,10 @@ pub fn update_files_2(suggestions: Vec<Suggestion>) {
 
     for (source_file, suggestions) in &files {
         let mut source = fs::read_to_string(source_file).unwrap();
-        let mut fix = rustfix::CodeFix::new(&source);
 
         for suggestion in suggestions.iter().rev() {
+            let mut fix = rustfix::CodeFix::new(&source);
+
             if let Err(e) = fix.apply(suggestion) {
                 eprintln!("Failed to apply suggestion to {}: {}", source_file, e);
             }
@@ -33,8 +35,8 @@ pub fn update_files_2(suggestions: Vec<Suggestion>) {
             let fixes = fix.finish().unwrap();
 
             println!();
-            println!("{}", suggestion.message);
-            if UserCli::confirm_update_2(&source_file, &source, &fixes) {
+            println!("{}", suggestion.message.bold());
+            if UserCli::confirm_update_2(source_file, &source, &fixes) {
                 source = fixes;
             }
         }
@@ -127,9 +129,9 @@ mod test {
         }
 
         fn confirm_update_2(
-            filename: &str,
-            original_contents: &str,
-            updated_contents: &str,
+            _filename: &str,
+            _original_contents: &str,
+            _updated_contents: &str,
         ) -> bool {
             true
         }
