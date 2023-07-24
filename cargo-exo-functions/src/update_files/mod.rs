@@ -6,13 +6,13 @@ use std::{
     collections::HashMap,
     fs::{self, OpenOptions},
     io::{BufRead, BufReader, Write},
-    path::Path,
+    path::{Path},
 };
 
 mod cli;
 mod params;
 
-pub fn update_files_2(suggestions: Vec<Suggestion>) {
+pub fn update_files_2(suggestions: Vec<Suggestion>, project_root: &Path) {
     let mut files = HashMap::new();
     for suggestion in suggestions {
         let file = suggestion.solutions[0].replacements[0]
@@ -22,30 +22,31 @@ pub fn update_files_2(suggestions: Vec<Suggestion>) {
         files.entry(file).or_insert_with(Vec::new).push(suggestion);
     }
 
-    for (source_file, suggestions) in &files {
-        let mut source = fs::read_to_string(source_file).expect(&source_file);
+    for (file, suggestions) in &files {
+        let filepath = project_root.join(file);
+        let mut source = fs::read_to_string(&filepath).unwrap_or_else(|_| panic!("{:?}", filepath));
         let mut change_counter = 0;
 
         for suggestion in suggestions.iter().rev() {
             let mut fix = rustfix::CodeFix::new(&source);
 
             if let Err(e) = fix.apply(suggestion) {
-                eprintln!("Failed to apply suggestion to {}: {}", source_file, e);
+                eprintln!("Failed to apply suggestion to {}: {}", file, e);
             }
 
             let fixes = fix.finish().unwrap();
 
             println!();
             println!("{}", suggestion.message.bold());
-            if UserCli::confirm_update_2(source_file, &source, &fixes) {
+            if UserCli::confirm_update_2(file, &source, &fixes) {
                 source = fixes;
                 change_counter += 1;
             }
         }
 
         if change_counter > 0 {
-            println!("🤖 writing {} changes to {}", change_counter, source_file);
-            fs::write(source_file, source).unwrap();
+            println!("🤖 writing {} changes to {}", change_counter, file);
+            fs::write(filepath, source).unwrap();
         }
     }
 }
@@ -63,11 +64,11 @@ impl From<Suggestion> for LineUpdate {
     }
 }
 
-pub fn update_files(args: &UpdateFilesParams) {
+pub fn update_files(args: &UpdateFilesParams, project_root: &Path) {
     for file_update in &args.files {
-        let path = Path::new(&file_update.file);
+        let path = project_root.join(&file_update.file);
         let lines = {
-            let file = OpenOptions::new().read(true).open(path).unwrap();
+            let file = OpenOptions::new().read(true).open(&path).unwrap();
             let reader = BufReader::new(file);
             reader.lines().collect::<Result<_, _>>().unwrap()
         };
