@@ -10,7 +10,7 @@ use indicatif::ProgressBar;
 use model::request::Request;
 use rustfix::CodeFix;
 use serde_json::Value;
-use std::{collections::HashSet, time::Duration};
+use std::{collections::HashSet, fs::OpenOptions, io::Write, time::Duration};
 use tokio::select;
 
 mod api;
@@ -44,29 +44,32 @@ async fn main() {
     // let args = Args::new(matches);
 
     let args = Args {
-        cmd: "clippy -- -D warnings".to_string(),
+        cmd: "check".to_string(),
     };
     let cmds = vec![args.cmd];
 
     for cmd in cmds {
         println!("🤖 {}", cmd);
 
-        let result = CargoCommand::new(&cmd).quiet().color_always().run_silent();
+        let json_result = CargoCommand::new(&cmd)
+            .color_always()
+            .message_format_json()
+            .run(false, true);
 
-        let output = if result.was_success() {
-            continue;
-        } else {
-            result.stderr
-        };
-
-        let json_result = CargoCommand::new(&cmd).message_format_json().run_silent();
-
-        println!("---------");
-        let suggestions = json_result
+        let messages = json_result
             .stdout
             .split('\n')
-            .filter_map(|line| serde_json::from_str::<Value>(line).ok())
-            .filter_map(|value| value.get("message").cloned())
+            .filter_map(|s| match serde_json::from_str::<Value>(s) {
+                Ok(v) => Some(v),
+                Err(e) => {
+                    println!("🤖 couldn't serialize: {:?}", e);
+                    None
+                }
+            })
+            .filter_map(|value| value.get("message").cloned());
+
+        println!("---------");
+        let suggestions = messages
             .filter_map(|message| {
                 let msg_str = message.to_string();
                 rustfix::get_suggestions_from_json(
@@ -84,6 +87,17 @@ async fn main() {
         update_files_2(suggestions);
 
         panic!();
+
+        let result = CargoCommand::new(&cmd)
+            .quiet()
+            .color_always()
+            .run(false, false);
+
+        let output = if result.was_success() {
+            continue;
+        } else {
+            result.stderr
+        };
 
         println!();
         if !Confirm::with_theme(&ColorfulTheme::default())

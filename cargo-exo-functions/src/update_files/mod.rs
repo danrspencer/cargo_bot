@@ -1,7 +1,6 @@
-use rustfix::Suggestion;
-
 use self::cli::{Cli, UserCli};
 pub use self::params::*;
+use rustfix::Suggestion;
 use std::{
     collections::HashMap,
     fs::{self, OpenOptions},
@@ -13,14 +12,6 @@ mod cli;
 mod params;
 
 pub fn update_files_2(suggestions: Vec<Suggestion>) {
-    // write the suggestions to as json for debug in tmp
-    let mut file = OpenOptions::new();
-    file.write(true);
-    file.create(true);
-    let mut file = file.open("/tmp/suggestions.json").unwrap();
-    let suggestions = serde_json::to_string_pretty(&suggestions).unwrap();
-    file.write_all(suggestions.as_bytes()).unwrap();
-
     let mut files = HashMap::new();
     for suggestion in suggestions {
         let file = suggestion.solutions[0].replacements[0]
@@ -31,26 +22,22 @@ pub fn update_files_2(suggestions: Vec<Suggestion>) {
     }
 
     for (source_file, suggestions) in &files {
-        let source = fs::read_to_string(source_file).unwrap();
+        let mut source = fs::read_to_string(source_file).unwrap();
         let mut fix = rustfix::CodeFix::new(&source);
 
         for suggestion in suggestions.iter().rev() {
-            let line_update = suggestion.clone().into();
-            if !UserCli::confirm_update(
-                &source_file,
-                &line_update,
-                &source.split('\n').map(String::from).collect::<Vec<_>>(),
-            ) {
-                continue;
-            }
-
             if let Err(e) = fix.apply(suggestion) {
                 eprintln!("Failed to apply suggestion to {}: {}", source_file, e);
             }
-        }
-        let fixes = fix.finish().unwrap();
 
-        println!("{}", fixes);
+            let fixes = fix.finish().unwrap();
+
+            println!();
+            println!("{}", suggestion.message);
+            if UserCli::confirm_update_2(&source_file, &source, &fixes) {
+                source = fixes;
+            }
+        }
     }
 }
 
@@ -136,6 +123,14 @@ mod test {
     impl Cli for FakeCli {
         fn display_error(_cause: &str) {}
         fn confirm_update(_file: &str, _line_update: &LineUpdate, _lines: &[String]) -> bool {
+            true
+        }
+
+        fn confirm_update_2(
+            filename: &str,
+            original_contents: &str,
+            updated_contents: &str,
+        ) -> bool {
             true
         }
     }

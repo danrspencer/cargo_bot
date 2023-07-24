@@ -42,66 +42,7 @@ impl CargoCommand {
         self
     }
 
-    pub fn run(&self) -> CargoCommandResult {
-        let current_dir = env::current_dir().expect("failed to get current directory");
-
-        let mut child = Command::new("cargo")
-            .args(&self.args)
-            .current_dir(current_dir)
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .expect("failed to execute process");
-
-        let stdout = child.stdout.take().unwrap();
-        let stderr = child.stderr.take().unwrap();
-
-        // Spawn a thread to handle stdout
-        let stdout_handle = thread::spawn(move || {
-            let reader = BufReader::new(stdout);
-            let mut output = String::new();
-
-            for line in reader.lines() {
-                let line = line.unwrap();
-                println!("{}", line);
-                output.push_str(&line);
-                output.push('\n');
-            }
-
-            output
-        });
-
-        // Spawn another thread to handle stderr
-        let stderr_handle = thread::spawn(move || {
-            let reader = BufReader::new(stderr);
-            let mut output = String::new();
-
-            for line in reader.lines() {
-                let line = line.unwrap();
-                eprintln!("{}", line);
-                output.push_str(&line);
-                output.push('\n');
-            }
-
-            output
-        });
-
-        let result = child.wait();
-
-        let stdout_output = stdout_handle.join().unwrap();
-        let stderr_output = stderr_handle.join().unwrap();
-
-        let stdout_stripped = strip_ansi_escapes::strip(stdout_output).unwrap();
-        let stderr_stripped = strip_ansi_escapes::strip(stderr_output).unwrap();
-
-        CargoCommandResult {
-            stdout: String::from_utf8(stdout_stripped).unwrap(),
-            stderr: String::from_utf8(stderr_stripped).unwrap(),
-            result,
-        }
-    }
-
-    pub fn run_silent(&self) -> CargoCommandResult {
+    pub fn run(&self, show_stdout: bool, show_stderr: bool) -> CargoCommandResult {
         let current_dir = env::current_dir().expect("failed to get current directory");
 
         let mut child = Command::new("cargo")
@@ -115,17 +56,60 @@ impl CargoCommand {
         let mut stdout = child.stdout.take().unwrap();
         let mut stderr = child.stderr.take().unwrap();
 
-        let mut stdout_output = String::new();
-        let mut stderr_output = String::new();
+        let stdout_output = if show_stdout {
+            // Spawn a thread to handle stdout
+            thread::spawn(move || {
+                let reader = BufReader::new(stdout);
+                let mut output = String::new();
 
-        stdout.read_to_string(&mut stdout_output).unwrap();
-        stderr.read_to_string(&mut stderr_output).unwrap();
+                for line in reader.lines() {
+                    let line = line.unwrap();
+                    println!("{}", line);
+                    output.push_str(&line);
+                    output.push('\n');
+                }
+
+                output
+            })
+            .join()
+            .unwrap()
+        } else {
+            let mut stdout_output = String::new();
+            stdout.read_to_string(&mut stdout_output).unwrap();
+            stdout_output
+        };
+
+        let stderr_output = if show_stderr {
+            // Spawn another thread to handle stderr
+            thread::spawn(move || {
+                let reader = BufReader::new(stderr);
+                let mut output = String::new();
+
+                for line in reader.lines() {
+                    let line = line.unwrap();
+                    eprintln!("{}", line);
+                    output.push_str(&line);
+                    output.push('\n');
+                }
+
+                output
+            })
+            .join()
+            .unwrap()
+        } else {
+            let mut stderr_output = String::new();
+            stderr.read_to_string(&mut stderr_output).unwrap();
+            stderr_output
+        };
 
         let result = child.wait();
 
+        let stdout_stripped = strip_ansi_escapes::strip(stdout_output).unwrap();
+        let stderr_stripped = strip_ansi_escapes::strip(stderr_output).unwrap();
+
         CargoCommandResult {
-            stdout: stdout_output,
-            stderr: stderr_output,
+            stdout: String::from_utf8(stdout_stripped).unwrap(),
+            stderr: String::from_utf8(stderr_stripped).unwrap(),
             result,
         }
     }
