@@ -1,16 +1,12 @@
 use crate::{args::Args, cargo::CargoCommand};
-use cargo::CargoCommandResult;
 use cargo_exo_functions::update_files::update_files_2;
-use chrono::serde;
-use clap::{Arg, Command};
 use config::Config;
 use core::panic;
 use dialoguer::{theme::ColorfulTheme, Confirm};
 use indicatif::ProgressBar;
 use model::request::Request;
-use rustfix::CodeFix;
 use serde_json::Value;
-use std::{collections::HashSet, fs::OpenOptions, io::Write, time::Duration};
+use std::{collections::HashSet, time::Duration};
 use tokio::select;
 
 mod api;
@@ -44,7 +40,7 @@ async fn main() {
     // let args = Args::new(matches);
 
     let args = Args {
-        cmd: "check".to_string(),
+        cmd: "clippy -- -D warnings".to_string(),
     };
     let cmds = vec![args.cmd];
 
@@ -84,9 +80,10 @@ async fn main() {
 
         println!("🤖 {} suggestions", suggestions.len());
 
-        update_files_2(suggestions);
-
-        panic!();
+        if !suggestions.is_empty() {
+            update_files_2(suggestions);
+            continue;
+        }
 
         let result = CargoCommand::new(&cmd)
             .quiet()

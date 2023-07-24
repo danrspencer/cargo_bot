@@ -24,6 +24,7 @@ pub fn update_files_2(suggestions: Vec<Suggestion>) {
 
     for (source_file, suggestions) in &files {
         let mut source = fs::read_to_string(source_file).unwrap();
+        let mut change_counter = 0;
 
         for suggestion in suggestions.iter().rev() {
             let mut fix = rustfix::CodeFix::new(&source);
@@ -38,7 +39,13 @@ pub fn update_files_2(suggestions: Vec<Suggestion>) {
             println!("{}", suggestion.message.bold());
             if UserCli::confirm_update_2(source_file, &source, &fixes) {
                 source = fixes;
+                change_counter += 1;
             }
+        }
+
+        if change_counter > 0 {
+            println!("🤖 writing {} changes to {}", change_counter, source_file);
+            fs::write(source_file, source).unwrap();
         }
     }
 }

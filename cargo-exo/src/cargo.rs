@@ -21,7 +21,6 @@ impl CargoCommand {
         Self {
             args: command
                 .split(' ')
-                .into_iter()
                 .map(String::from)
                 .collect::<Vec<_>>(),
         }
