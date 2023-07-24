@@ -1,7 +1,5 @@
 use clap::ArgMatches;
 
-const DEFAULT_FLAGS: &[&str; 2] = &["--quiet", "--color=always"];
-
 const ARG_EXEC: &str = "arg:exec";
 
 pub struct Args {

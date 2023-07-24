@@ -2,8 +2,8 @@ use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-// pub const MODEL: &str = "gpt-4-0613";
-pub const MODEL: &str = "gpt-3.5-turbo-0613";
+pub const GPT_3_5: &str = "gpt-3.5-turbo-0613";
+pub const GPT_4: &str = "gpt-4-0613";
 
 const SYSTEM_CONTEXT: &str = include_str!("../../../resources/prompts/system.md");
 
@@ -48,7 +48,7 @@ pub struct Function {
 }
 
 impl Request {
-    pub fn new(command: String, output: String) -> Self {
+    pub fn new(command: String, output: String, model: String) -> Self {
         let messages = vec![
             Message {
                 role: Role::System,
@@ -61,7 +61,7 @@ impl Request {
         ];
 
         Self {
-            model: MODEL.to_string(),
+            model,
             temperature: 0.0,
             messages,
             functions: vec![

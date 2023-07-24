@@ -1,8 +1,11 @@
+use crate::model::request::GPT_3_5;
+use crate::model::request::GPT_4;
 use crate::{args::Args, cargo::CargoCommand};
 use cargo_exo_functions::update_files::update_files_2;
 use config::Config;
 use core::panic;
-use dialoguer::{theme::ColorfulTheme, Confirm};
+use dialoguer::Select;
+
 use indicatif::ProgressBar;
 use model::request::Request;
 use serde_json::Value;
@@ -97,20 +100,23 @@ async fn main() {
         };
 
         println!();
-        if !Confirm::with_theme(&ColorfulTheme::default())
+        let model = match Select::new()
+            .items(&["GPT 3.5 Turbo", "GPT 4", "Nope"])
             .with_prompt("Phone a friend? 📞🤖".to_string())
-            .default(true)
+            .default(0)
             .interact()
             .unwrap()
         {
-            break;
-        }
+            0 => GPT_3_5,
+            1 => GPT_4,
+            _ => break,
+        };
 
-        let request = Request::new(cmd, output);
+        let request = Request::new(cmd, output, model.to_string());
         let mut request_fut = Box::pin(api::send_request(&request, config.api_key.clone()));
 
         let spinner = ProgressBar::new_spinner();
-        spinner.set_message(format!("🤖 thinking ... ({})", model::request::MODEL));
+        spinner.set_message(format!("🤖 thinking ... ({})", model));
         let mut interval = tokio::time::interval(Duration::from_millis(50));
 
         let result = loop {
