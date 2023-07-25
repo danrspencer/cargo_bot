@@ -156,7 +156,9 @@ async fn main() {
             Some(model::response::FunctionCall::Explain(params)) => {
                 cargo_exo_functions::explain::explain(params);
             }
-            Some(model::response::FunctionCall::MoreContext(params)) => println!("{:?}", params),
+            Some(model::response::FunctionCall::MoreContext(params)) => {
+                cargo_exo_functions::more_context::more_context(params, &project_root)
+            }
             None => {
                 println!("🤖 no changes to make!");
             }
