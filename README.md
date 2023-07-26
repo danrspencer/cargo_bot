@@ -70,9 +70,10 @@ As depicted, Cargo Exo takes the unused variable warning, suggests a fix, and as
 
 To enhance your development experience, you can also pair Cargo Exo with Cargo Watch for real-time error fixing. Ensure you have Cargo Watch installed, then run the following command:
 
-bash
-Copy code
+```bash
 $ cargo watch --watch-when-idle -x exo
+```
+
 This command will automatically apply Cargo Exo each time your source code changes, offering suggestions for fixes as you code.
 
 ## Contributing
