@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 cargo-exo-functions = { path = "../cargo-exo-functions" }
+cargo-exo-cli = { path = "../cargo-exo-cli" }
 
 serde_json.workspace = true
 clap.workspace = true

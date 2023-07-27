@@ -2,20 +2,20 @@ use crate::args::ARG_EXEC;
 use crate::model::request::GPT_3_5;
 use crate::model::request::GPT_4;
 use crate::{args::Args, cargo::CargoCommand};
-use cargo_exo_functions::update_files::update_files_2;
+use ::rustfix::get_suggestions_from_json;
+use ::rustfix::Filter;
 use clap::Arg;
 use clap::Command;
 use colored::Colorize;
 use config::Config;
 use core::panic;
 use dialoguer::Select;
-use std::env;
-use std::path::Path;
-use std::path::PathBuf;
-
 use indicatif::ProgressBar;
 use model::request::Request;
 use serde_json::Value;
+use std::env;
+use std::path::Path;
+use std::path::PathBuf;
 use std::{collections::HashSet, time::Duration};
 use tokio::select;
 
@@ -24,6 +24,7 @@ mod args;
 mod cargo;
 mod config;
 mod model;
+mod rustfix;
 
 #[tokio::main]
 async fn main() {
@@ -83,18 +84,13 @@ async fn main() {
             .filter_map(|message| {
                 let msg_str = message.to_string();
                 // TODO - can we update this to just parse the Value directly?
-                rustfix::get_suggestions_from_json(
-                    &msg_str,
-                    &HashSet::new(),
-                    rustfix::Filter::Everything,
-                )
-                .ok()
+                get_suggestions_from_json(&msg_str, &HashSet::new(), Filter::Everything).ok()
             })
             .flatten()
             .collect::<Vec<_>>();
 
         if !suggestions.is_empty() {
-            update_files_2(suggestions, &project_root);
+            rustfix::update_files(suggestions, &project_root);
             continue;
         }
 

@@ -157,6 +157,7 @@ checksum = "89b2fd2a0dcf38d7971e2194b6b6eebab45ae01067456a7fd93d5547a61b70be"
 name = "cargo-exo"
 version = "0.1.0"
 dependencies = [
+ "cargo-exo-cli",
  "cargo-exo-functions",
  "chrono",
  "clap",
@@ -177,25 +178,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "cargo-exo-cli"
+version = "0.1.0"
+dependencies = [
+ "colored",
+ "dialoguer",
+ "difference",
+]
+
+[[package]]
 name = "cargo-exo-functions"
 version = "0.1.0"
 dependencies = [
+ "cargo-exo-cli",
  "chrono",
  "colored",
  "dialoguer",
  "difference",
- "indicatif",
  "itertools",
- "once_cell",
  "regex",
- "reqwest",
  "rustfix",
  "schemars",
  "serde",
  "serde_json",
- "strip-ansi-escapes",
- "tokio",
- "toml",
 ]
 
 [[package]]
