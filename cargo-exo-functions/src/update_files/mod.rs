@@ -1,6 +1,7 @@
 use self::cli::{Cli, UserCli};
 pub use self::params::*;
 use colored::Colorize;
+use itertools::Itertools;
 use rustfix::Suggestion;
 use std::{
     collections::HashMap,
@@ -38,7 +39,7 @@ pub fn update_files_2(suggestions: Vec<Suggestion>, project_root: &Path) {
 
             println!();
             println!("{}", suggestion.message.bold());
-            if UserCli::confirm_update_2(file, &source, &fixes) {
+            if UserCli::confirm_update(file, &source, &fixes) {
                 source = fixes;
                 change_counter += 1;
             }
@@ -90,34 +91,38 @@ pub fn update_files(args: &UpdateFilesParams, project_root: &Path) {
 fn update_lines<C: Cli>(file_update: &FileUpdate, mut lines: Vec<String>) -> Vec<String> {
     C::display_error(&file_update.cause);
 
-    let confirmed_line_updates = file_update
+    for line_update in file_update
         .lines
         .iter()
-        .filter(|line_update| C::confirm_update(&file_update.file, line_update, &lines))
-        .collect::<Vec<_>>();
-
-    let mut line_offset = -1;
-    for line_update in confirmed_line_updates {
-        let index = (line_update.line_no + line_offset) as usize;
+        .sorted_by(|a, b| a.line_no.cmp(&b.line_no))
+    {
+        let mut updated_lines = lines.clone();
+        let index = (line_update.line_no - 1) as usize;
 
         match line_update.action {
             LineAction::Insert => {
                 if let Some(ref content) = line_update.content {
-                    lines.insert(index, content.clone());
-                    line_offset += 1;
+                    updated_lines.insert(index, content.clone());
                 }
             }
             LineAction::Replace => {
                 if let (Some(ref content), Some(line)) =
-                    (&line_update.content, lines.get_mut(index))
+                    (&line_update.content, updated_lines.get_mut(index))
                 {
                     *line = content.clone();
                 }
             }
             LineAction::Delete => {
-                lines.remove(index);
-                line_offset -= 1;
+                updated_lines.remove(index);
             }
+        }
+
+        if C::confirm_update(
+            &file_update.file,
+            &lines.join("\n"),
+            &updated_lines.join("\n"),
+        ) {
+            lines = updated_lines;
         }
     }
 
@@ -136,7 +141,7 @@ mod test {
             true
         }
 
-        fn confirm_update_2(
+        fn confirm_update(
             _filename: &str,
             _original_contents: &str,
             _updated_contents: &str,

@@ -11,6 +11,7 @@ colored.workspace = true
 dialoguer.workspace = true
 difference.workspace = true
 indicatif.workspace = true
+itertools.workspace = true
 once_cell.workspace = true
 regex.workspace = true
 rustfix.workspace = true
