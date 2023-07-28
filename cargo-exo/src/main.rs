@@ -18,6 +18,12 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::{collections::HashSet, time::Duration};
 use tokio::select;
+use watchexec::{
+    action::{Action, Outcome},
+    config::{InitConfig, RuntimeConfig},
+    handler::{Handler as _, PrintDebug},
+    Watchexec,
+};
 
 mod api;
 mod args;
@@ -28,6 +34,11 @@ mod rustfix;
 
 #[tokio::main]
 async fn main() {
+    // TODO - Implement watchexec
+    // https://github.com/watchexec/watchexec/tree/main/crates/lib
+    let mut init = InitConfig::default();
+    init.on_error(PrintDebug(std::io::stderr()));
+
     let config = Config::init();
 
     let args: Vec<String> = env::args().collect();
@@ -42,15 +53,23 @@ async fn main() {
         .disable_help_subcommand(true)
         .subcommand_required(!was_cargo_run)
         .subcommand(
-            Command::new("exo").arg(
-                Arg::new(ARG_EXEC)
-                    .short('x')
-                    .long("exec")
-                    .value_name("command")
-                    // todo - maybe we want to let people specify multiple commands?
-                    .number_of_values(1)
-                    .help("Cargo command(s) to execute on changes [default: clippy]"),
-            ),
+            Command::new("exo")
+                .arg(
+                    Arg::new(ARG_EXEC)
+                        .short('x')
+                        .long("exec")
+                        .value_name("command")
+                        // todo - maybe we want to let people specify multiple commands?
+                        .number_of_values(1)
+                        .help("Cargo command(s) to execute on changes [default: clippy]"),
+                )
+                .arg(
+                    Arg::new("watch")
+                        .short('w')
+                        .long("watch")
+                        .value_name("watch")
+                        .help("Watch files for changes, pauses while interacting with suggestions"),
+                ),
         );
 
     let matches = cmd.get_matches();

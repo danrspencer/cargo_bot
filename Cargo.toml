@@ -21,3 +21,4 @@ serde_json = "1.0"
 strip-ansi-escapes = "0.1"
 tokio = { version = "1.0", features = ["full"] }
 toml = "0.5"
+watchexec = "2.3"
