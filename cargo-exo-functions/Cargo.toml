@@ -16,5 +16,5 @@ itertools.workspace = true
 regex.workspace = true
 rustfix.workspace = true
 schemars.workspace = true
-serde_json.workspace = true
 serde.workspace = true
+serde_json.workspace = true

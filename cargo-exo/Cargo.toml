@@ -4,13 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-cargo-exo-functions = { path = "../cargo-exo-functions" }
 cargo-exo-cli = { path = "../cargo-exo-cli" }
+cargo-exo-functions = { path = "../cargo-exo-functions" }
 
-serde_json.workspace = true
-clap.workspace = true
-rustfix.workspace = true
 chrono.workspace = true
+clap.workspace = true
 colored.workspace = true
 dialoguer.workspace = true
 difference.workspace = true
@@ -18,7 +16,9 @@ indicatif.workspace = true
 once_cell.workspace = true
 regex.workspace = true
 reqwest.workspace = true
+rustfix.workspace = true
 serde.workspace = true
+serde_json.workspace = true
 strip-ansi-escapes.workspace = true
 tokio.workspace = true
 toml.workspace = true
