@@ -13,9 +13,9 @@ mod api;
 mod args;
 mod cargo;
 mod config;
+mod fix;
 mod gpt;
 mod model;
-mod rustfix;
 
 #[tokio::main]
 async fn main() {
@@ -52,10 +52,10 @@ async fn main() {
             .message_format_json()
             .run(false, false);
 
-        let suggestions = rustfix::get_suggestions(&json_result);
+        let suggestions = fix::get_suggestions(&json_result);
 
         if !suggestions.is_empty() {
-            rustfix::update_files(suggestions, &project_root);
+            fix::update_files(suggestions, &project_root);
             continue;
         }
 
