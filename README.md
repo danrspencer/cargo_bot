@@ -7,7 +7,7 @@
 
 ---
 
-![Rust Workflow](https://github.com/danrspencer/cargo_exo/actions/workflows/rust.yml/badge.svg)
+[![Rust Workflow](https://github.com/danrspencer/cargo_exo/actions/workflows/rust.yml/badge.svg)](https://github.com/danrspencer/cargo_exo/actions/workflows/rust.yml)
 
 Cargo Exo is a Rust ecosystem plugin that enhances your development experience. It uses RustFix to attempt automatic fixes for any errors it encounters. In case of build failures with no automatic fixes available, it utilizes ChatGPT to suggest solutions, thus making your codebase more efficient and bug-free.
 
