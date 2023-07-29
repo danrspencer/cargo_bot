@@ -3,5 +3,6 @@
         "./Cargo.toml",
         "./cargo-exo/Cargo.toml",
         "./cargo-exo-functions/Cargo.toml",
+        "./cargo-exo/Cargo.toml"
     ]
 }

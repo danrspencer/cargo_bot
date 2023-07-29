@@ -1,9 +1,28 @@
+use crate::cargo::CargoCommandResult;
 use crate::Path;
 use cargo_exo_cli::{Cli, UserCli};
 use colored::Colorize;
-use rustfix::Suggestion;
-use std::collections::HashMap;
+use rustfix::{Filter, Suggestion};
+use serde_json::Value;
+use std::collections::{HashMap, HashSet};
 use std::fs;
+
+pub fn get_suggestions(cmd_result: &CargoCommandResult) -> Vec<Suggestion> {
+    let messages = cmd_result
+        .stdout
+        .split('\n')
+        .filter_map(|s| serde_json::from_str::<Value>(s).ok())
+        .filter_map(|value| value.get("message").cloned());
+
+    messages
+        .filter_map(|message| {
+            let msg_str = message.to_string();
+            // TODO - can we update this to just parse the Value directly?
+            rustfix::get_suggestions_from_json(&msg_str, &HashSet::new(), Filter::Everything).ok()
+        })
+        .flatten()
+        .collect::<Vec<_>>()
+}
 
 pub fn update_files(suggestions: Vec<Suggestion>, project_root: &Path) {
     let mut files = HashMap::new();
