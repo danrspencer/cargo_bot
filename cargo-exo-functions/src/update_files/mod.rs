@@ -50,12 +50,11 @@ fn update_lines<C: Cli>(file_update: &FileUpdate, mut lines: Vec<String>) -> Vec
     C::display_error(&file_update.cause);
 
     let rev_sorted_updates = file_update
-    .lines
-    .iter()
-    .sorted_by(|a, b| b.line_no.cmp(&a.line_no))
+        .lines
+        .iter()
+        .sorted_by(|a, b| b.line_no.cmp(&a.line_no));
 
-    for line_update in rev_sorted_updates
-    {
+    for line_update in rev_sorted_updates {
         let mut updated_lines = lines.clone();
         let index = (line_update.line_no - 1) as usize;
 
