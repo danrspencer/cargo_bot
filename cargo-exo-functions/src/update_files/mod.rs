@@ -49,10 +49,12 @@ pub fn update_files(args: &UpdateFilesParams, project_root: &Path) {
 fn update_lines<C: Cli>(file_update: &FileUpdate, mut lines: Vec<String>) -> Vec<String> {
     C::display_error(&file_update.cause);
 
-    for line_update in file_update
-        .lines
-        .iter()
-        .sorted_by(|a, b| a.line_no.cmp(&b.line_no))
+    let rev_sorted_updates = file_update
+    .lines
+    .iter()
+    .sorted_by(|a, b| b.line_no.cmp(&a.line_no))
+
+    for line_update in rev_sorted_updates
     {
         let mut updated_lines = lines.clone();
         let index = (line_update.line_no - 1) as usize;
